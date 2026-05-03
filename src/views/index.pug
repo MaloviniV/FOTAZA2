@@ -1,0 +1,16 @@
+extends layout.pug
+
+block content
+  //- --- Seccion de bienvenida ---
+  section#main-welcome
+    h1 Aquí es donde comienza un gran trabajo
+    h2 Increíbles imágenes para descargar
+
+  //- --- Muro de bienvenida ---
+  section#main-wall
+    h2 Fotos populares 
+    .grid-container 
+      each foto in fotos
+        .grid-item 
+          img(src=`/imagenes/${foto}` alt="imagen" loading="lazy")
+    button.wall-more-btn(type="button" data-offset=nextOffset) Cargar Más

@@ -1,0 +1,30 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title #{title || "Fotaza 2"}
+    link(rel="stylesheet", href="/css/style.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+    script(src="/js/main.js" type="module" defer)
+
+  body
+    header 
+      div.navbar
+        div.navbar-logo
+          a.navbar-logo-link(href="/") FOTAZA 2
+        div.navbar-search
+          input.navbar-search-input(type="search" placeholder="Buscar etiquetas...")
+          button.navbar-search-btn(type="button" title="Buscar")
+            i.fas.fa-search
+        nav.navbar-nav
+          ul.navbar-nav-list
+            li.nav-item: a(href="/explorer") EXPLORAR
+            li.nav-item: a(href="/auth") INICIAR SESION
+    main 
+      div
+        block content
+
+    footer
+      p © 2026 FOTAZA 2 - Todos los derechos reservados
+      p Victor Jose David Malovini ULP - PW2

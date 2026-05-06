@@ -1,7 +1,7 @@
-export const register = (req, res) => {
-  res.send("Enviando FORMULARIO DE 📋 REGISTRO");
+export const login = (req, res) => {
+  res.render("auth/formLogin.pug");
 }
 
-export const login = (req, res) => {
-  res.send("Enviando FORMULARIO DE 🔑 LOGIN ");
+export const register = (req, res) => {
+  res.render("auth/formRegister.pug");
 }

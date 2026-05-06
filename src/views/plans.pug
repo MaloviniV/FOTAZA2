@@ -1,0 +1,28 @@
+extends layout.pug
+
+block content 
+  section.plans-section
+    .plans-header
+      h2 Nuestros Planes
+      p Elige la suscripción que mejor se adapte a tus necesidades para disfrutar al máximo de FOTAZA 2.
+    
+    .plans-container
+      //- Plan Básico
+      .plan-card
+        h3 Básico
+        p.plan-price Gratis
+        ul.plan-features
+          li 50 fotos mensuales
+          li Calidad estándar
+          li Soporte comunitario
+        a.btn-submit(href="/auth/register") Comenzar Gratis
+
+      //- Plan Pro
+      .plan-card.plan-pro
+        h3 Pro
+        p.plan-price $5.99 / mes
+        ul.plan-features
+          li Fotos ilimitadas
+          li Alta resolución (HD)
+          li Álbumes privados y sin anuncios
+        a.btn-submit(href="/checkout") Elegir Pro

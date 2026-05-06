@@ -1,0 +1,25 @@
+extends ../layout.pug
+
+block content 
+  section.login-section
+    .form-container
+      h2 Únete a FOTAZA 2
+      p ¿Ya tienes una cuenta? 
+        a(href="/auth/login") Inicia sesión
+      form(action="/auth/register" method="POST")
+        .form-group
+          label(for="longname") Apellido:
+          input#longname.form-control(type="text" name="longname" placeholder="Ingresa tu apellido" required)
+        .form-group
+          label(for="name") Nombre:
+          input#name.form-control(type="text" name="name" placeholder="Ingresa tu nombre" required)
+        .form-group
+          label(for="birthdate") Fecha de Nacimiento:
+          input#birthdate.form-control(type="date" name="birthdate" placeholder="Ingresa tu fecha de nacimiento" required onkeydown="return false")
+        .form-group
+          label(for="username") Usuario o Email:
+          input#username.form-control(type="text" name="username" placeholder="Ingresa tu usuario" required)
+        .form-group
+          label(for="password") Contraseña:
+          input#password.form-control(type="password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="new-password")
+        button.btn-submit(type="submit") Únete 

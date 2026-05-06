@@ -1,8 +1,8 @@
 import fs from "fs";
 
 const LIMIT = 10;
-//HARDCODEADO PARA CARGAR IMAGENS PRECARGADAS DESDE PUBLIC/IMAGENES
-export const index = (req, res) => {
+
+export const loadMoreImages = (req, res) => {
   fs.readdir("public/imagenes", (error, files) => {
     if (error) res.send("Error al leer los archivos");
 
@@ -13,15 +13,6 @@ export const index = (req, res) => {
 
     console.log(fotos);
 
-    res.render("homePublic.pug", { hasMore, nextOffset, fotos });
+    res.json({ hasMore, nextOffset, fotos });
   });
 };
-
-export const contact = (req, res) => {
-  res.send("Formulario de contacto");
-}
-
-export const plans = (req, res) => {
-  res.render("plans.pug");
-}
-

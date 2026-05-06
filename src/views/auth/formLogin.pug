@@ -1,0 +1,17 @@
+extends ../layout.pug
+
+block content 
+  section.login-section
+    .form-container
+      h2 Iniciar Sesión
+      form(action="/auth/login" method="POST")
+        .form-group
+          label(for="username") Usuario o Email:
+          input#username.form-control(type="text" name="username" placeholder="Ingresa tu usuario" required)
+        .form-group
+          label(for="password") Contraseña:
+          input#password.form-control(type="password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="new-password")
+        button.btn-submit(type="submit") Ingresar
+      .form-footer
+        p ¿No tienes cuenta? 
+          a(href="/auth/register") Regístrate

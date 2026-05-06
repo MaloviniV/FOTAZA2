@@ -4,15 +4,19 @@ export class UIManager {
     this.searchBtn = document.querySelector(".navbar-search-btn");
     this.loadMoreBtn = document.querySelector(".wall-more-btn");
     this.gridContainer = document.querySelector(".grid-container");
+    this.navItems = document.querySelectorAll(".nav-item a");
   }
 
   init() {
     // Limpio el input de busqueda al cargar la pagina
     if (this.searchInput) {
-      this.searchInput.value = '';
+      this.searchInput.value = "";
     }
 
     this.#addEventListeners();
+    
+    this.#highlightLink();
+
   }
 
   #addEventListeners() {
@@ -26,9 +30,9 @@ export class UIManager {
     if(this.loadMoreBtn) {
       this.loadMoreBtn.addEventListener("click", async (e) => {
         const btn = e.target;
-        const offset = btn.dataset.offset;
+        const offset = btn.dataset.offset; 
 
-        const response = await fetch(`/loadImages?offset=${offset}`);
+        const response = await fetch(`/image/loadImages?offset=${offset}`);
         const { hasMore, nextOffset, fotos } = await response.json();
 
         this.#chargeImages(fotos);
@@ -64,5 +68,19 @@ export class UIManager {
     });
 
     this.gridContainer.appendChild(fragment);
+  }
+
+  #highlightLink(){
+    const currentPath = window.location.pathname;
+
+    this.navItems.forEach((item) => {
+      const linkHref = item.getAttribute("href");
+
+      if (linkHref === currentPath) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
   }
 }

@@ -91,7 +91,17 @@ header {
 }
 
 .nav-item a:hover {
-  background-color: #f8f9fa;
+  background-color: #ecf6ffd9;
+}
+
+/* ITEM ACTIVO */
+.nav-item a.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.nav-item a.active:hover {
+  background-color: #0056b3;
 }
 
 /* Main content */
@@ -190,6 +200,118 @@ main {
   box-shadow: 0 2px 4px rgba(0, 7, 187, 0.3);
 }
 
+/* --- SECTION LOGIN y REGISTER---*/
+
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh; /* Centra verticalmente dependiendo del alto de tu header/footer */
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.form-container {
+  background-color: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.form-container p {
+  text-align: center;
+  margin-bottom: 1.8rem;
+  color: #333;
+  font-size: 1rem;
+}
+
+.form-container a {
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.form-container a:hover {
+  color: #004c99;
+  text-decoration: underline;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Previene que el padding desborde el ancho */
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 0.85rem;
+  background-color: #0066cc;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn-submit:hover {
+  background-color: #004c99;
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.form-footer a {
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.form-footer a:hover {
+  color: #004c99;
+  text-decoration: underline;
+}
+
 /* Footer */
 footer {
   background-color: #333;
@@ -201,4 +323,62 @@ footer {
 
 footer p {
   margin: 0.5rem 0;
+}
+
+/* --- SECCIÓN DE PLANES --- */
+.plans-section {
+  padding: 3rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.plans-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap; /* Permite que las tarjetas bajen en móviles */
+}
+
+.plan-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.plan-price {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #007bff;
+  margin: 1.5rem 0;
+}
+
+.plan-features {
+  list-style: none;
+  margin-bottom: 2rem;
+  padding: 0;
+}
+
+.plan-features li {
+  margin-bottom: 0.8rem;
+  color: #555;
+}
+
+.plan-card a.btn-submit {
+  display: block;
+  text-decoration: none;
 }

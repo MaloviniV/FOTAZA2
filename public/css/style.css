@@ -312,6 +312,11 @@ main {
   text-decoration: underline;
 }
 
+p.error{
+  color: red;
+  margin-top: 1rem;
+}
+
 /* Footer */
 footer {
   background-color: #333;

@@ -10,7 +10,8 @@ block content
   section#main-wall
     h2 Fotos populares 
     .grid-container 
-      each foto in fotos
-        .grid-item 
-          img(src=`/imagenes/${foto}` alt="imagen" loading="lazy")
+      if fotos
+        each foto in fotos
+          .grid-item 
+            img(src=`/imagenes/${foto}` alt="imagen" loading="lazy")
     button.wall-more-btn(type="button" data-offset=nextOffset) Cargar Más

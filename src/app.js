@@ -10,6 +10,8 @@ import apiRoutes from "./routes/apiRoutes.js";
 import privateRoutes from "./routes/privateRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AppError from "./utils/AppError.js";
+import sequelize from "./config/db.js";
+import "./models/index.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,13 +29,13 @@ app.use(express.json()); //Para leer datos en JSON
 app.use(express.static(path.join(__dirname, "..", "public"))); //Donde buscar archivos estaticos
 
 //Middleware de rutas
+app.get("/favicon.ico", (req, res) => res.status(204).end()); //ruta faviconico
 
 app.use("/image", apiRoutes);
 app.use("/auth", authRoutes);
 app.use("/dashboard", privateRoutes);
 app.use("/", publicRoutes);
 
-app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 //Manejo de errores
 app.use((req, res, next) => {   //Rutas no encontradas
@@ -41,8 +43,26 @@ app.use((req, res, next) => {   //Rutas no encontradas
 });
 app.use(errorHandler);  //Errores generales
 
-//Levantar el servidor
-const PORT = server.port;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en: http://localhost:${PORT}`);
-});
+//Levantar el servidor y BD
+(async () => {
+  try {
+/*     console.log("Base de datos conectada:", sequelize.config.database);
+    console.log("Modelos registrados:", Object.keys(sequelize.models));
+ */
+    await sequelize.sync({alter: true});
+    console.log("BD sincronizada y conectada con exito");
+
+    const PORT = server.port;
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en: http://localhost:${PORT}`);
+    });  
+  } catch (error) {
+    if (server.debug) {
+      console.error("Error al inicializar la base de datos:", error);
+    } else {
+      console.error("Error crítico: No se pudo conectar a la base de datos.");
+    }
+    process.exit(1);
+  }
+})();
+

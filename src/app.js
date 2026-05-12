@@ -1,5 +1,6 @@
 import express from "express";
 import {server} from "./config/config.js";
+import {connectDatabase} from "./config/db.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -10,8 +11,6 @@ import apiRoutes from "./routes/apiRoutes.js";
 import privateRoutes from "./routes/privateRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AppError from "./utils/AppError.js";
-import sequelize from "./config/db.js";
-import "./models/index.js"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,23 +45,29 @@ app.use(errorHandler);  //Errores generales
 //Levantar el servidor y BD
 (async () => {
   try {
-/*     console.log("Base de datos conectada:", sequelize.config.database);
-    console.log("Modelos registrados:", Object.keys(sequelize.models));
- */
-    await sequelize.sync({alter: true});
-    console.log("BD sincronizada y conectada con exito");
+    await connectDatabase();
 
-    const PORT = server.port;
-    app.listen(PORT, () => {
-      console.log(`Servidor corriendo en: http://localhost:${PORT}`);
-    });  
   } catch (error) {
     if (server.debug) {
       console.error("Error al inicializar la base de datos:", error);
     } else {
-      console.error("Error crítico: No se pudo conectar a la base de datos.");
+      console.error("Error critico: No se pudo conectar a la base de datos.");
     }
     process.exit(1);
   }
+
+  const PORT = server.port;
+  const expressServer = app.listen(PORT, () => {
+    console.log(`Servidor corriendo en: http://localhost:${PORT}`);
+  });
+
+  expressServer.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      console.error(`Error critico: El puerto ${PORT} ya esta en uso.`);
+    } else {
+      console.error("Error al arrancar el servidor Express:", error);
+    }
+    process.exit(1);
+  });
 })();
 

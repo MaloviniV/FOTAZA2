@@ -1,6 +1,7 @@
 import express from "express";
 import {server} from "./config/config.js";
 import {connectDatabase} from "./config/db.js";
+import "./models/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 

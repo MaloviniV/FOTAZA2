@@ -14,6 +14,18 @@ export const connectDatabase = async () => {
 
     await sequelize.sync({alter: true});
     console.log("✅ BD sincronizada con exito");
+//CONSTRAINTS
+    await sequelize.query(`
+      DO $$ 
+      BEGIN
+          ALTER TABLE "follows" DROP CONSTRAINT IF EXISTS "seguirse";
+          
+          ALTER TABLE "follows" 
+          ADD CONSTRAINT "seguirse" 
+          CHECK ("followerId" <> "followingId");
+      END $$;
+    `);
+
   } catch (error) {
     throw error
   }

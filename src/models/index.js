@@ -1,6 +1,7 @@
 import User from "./User.js";
 import Follow from "./Follow.js";
-import Post from "./Post.js"
+import Post from "./Post.js";
+import Image from "./Image.js";
 
 //USER->FOLLOW(m..n)
 User.belongsToMany(User, {
@@ -44,5 +45,15 @@ User.hasMany(Post, {
 
 Post.belongsTo(User, {
   foreignKey: "idUser",
+  targetKey: "id"
+});
+//POST->IMAGE
+Post.hasMany(Image, {
+  foreignKey: "idPost",
+  sourceKey: "id",
+});
+
+Image.belongsTo(Post, {
+  foreignKey: "idPost",
   targetKey: "id"
 });

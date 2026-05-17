@@ -387,3 +387,7 @@ footer p {
   display: block;
   text-decoration: none;
 }
+
+.oculto {
+  display: none;
+}

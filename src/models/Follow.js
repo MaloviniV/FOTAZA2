@@ -25,6 +25,7 @@ Follow.init(
       }
     },
     status: {
+      defaultValue: STATUS_FOLLOW.PENDING,
       type: DataTypes.ENUM(...LIST_STATUS_FOLLOW),
       allowNull: false
     }

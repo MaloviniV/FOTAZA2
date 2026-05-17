@@ -6,10 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 //Importacion de routes
-import publicRoutes from "./routes/publicRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import apiRoutes from "./routes/apiRoutes.js";
-import privateRoutes from "./routes/privateRoutes.js";
+import * as routes from "./routes/indexRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AppError from "./utils/AppError.js";
 
@@ -30,11 +27,11 @@ app.use(express.static(path.join(__dirname, "..", "public"))); //Donde buscar ar
 
 //Middleware de rutas
 app.get("/favicon.ico", (req, res) => res.status(204).end()); //ruta faviconico
-
-app.use("/image", apiRoutes);
-app.use("/auth", authRoutes);
-app.use("/dashboard", privateRoutes);
-app.use("/", publicRoutes);
+app.use("/post", routes.postRoutes);
+app.use("/image", routes.apiRoutes);
+app.use("/auth", routes.authRoutes);
+app.use("/dashboard", routes.privateRoutes);
+app.use("/", routes.publicRoutes);
 
 
 //Manejo de errores

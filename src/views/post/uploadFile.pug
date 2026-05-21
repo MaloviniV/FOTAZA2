@@ -1,0 +1,55 @@
+extend ../layout.pug
+include ../mixin/uploadConfirmation.pug
+
+block metadata 
+    link(rel="stylesheet", href="/css/uploadFileStyle.css")
+    script(src="/js/uploadFileJS.js" type="module" defer)
+
+block content
+  if uploadSuccess
+    +successConfirmation(
+      "El archivo se ha guardado correctamente.",
+      "¡Subida Exitosa!",
+      "Volver al Inicio",
+      "/dashboard",
+      "Subir otro archivo"
+    )
+
+  section
+    #viem_uploadFile 
+      h2 SUBIENDO UN ARCHIVO A FOTAZA
+      form#form_uploadFile(action="/post/formUploadFile" method="POST" enctype="multipart/form-data")
+        #upload_file
+          input(type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg, video/mp4, video/webm" placeholder="¡¡Subi tu archivo a FOTAZA!!" required)
+          img.image_preview.oculto#image_preview(alt="Vista previa")
+          video.video_preview.oculto#video_preview(controls)
+        #metadata_file 
+          #title_Post
+            label(for="post") ALBUM:
+            input(type="text" name="post" value=titlePost readonly)
+          #title_image 
+            label(for="title") Titulo:
+            input(type="text" name="title" placeholder="Titulo del archivo..." required)
+          #description 
+            label(for="description") DESCRIPCIÓN: 
+            input(type="text" name="description" placeholder="Ingresa una breve descripcion...")
+          #tags
+            label(for="tags") TAGS: 
+            select(name="tags" id="tags" multiple)
+              if tags
+                each tag in tags 
+                  option(value=tag)= tag.charAt(0).toUpperCase() + tag.slice(1)
+              else
+                option(value="")= "Sin Etiquetas"
+          #openComments
+            label(for="openComments") Permitir comentarios?: 
+            input(type="checkbox" name="openComments" id="openComments")
+          #hasCopyright_image
+            label(for="hasCopyright") Aplicar Copiright?: 
+            input(type="checkbox" name="hasCopyright" id="hasCopyright")
+            #copyright_text.oculto
+              label(for="textCopyright") Texto del Copyright: 
+              input(type="text" name="textCopyright" placeholder="Texto del copyright...")
+        #uploadFile_btn
+          button#upload_btn(type="submit") SUBIR
+          button#cancel_btn(type="button") CANCELAR

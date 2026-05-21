@@ -1,26 +1,23 @@
 extends ../layout.pug
 
 block metadata 
-  link(rel="stylesheet", href="/css/postStyle.css")
-  script(src="/js/post.js" type="module" defer) 
+  link(rel="stylesheet", href="/css/formPostStyle.css")
+  script(src="/js/formPostJS.js" type="module" defer) 
 
 block content
-  section.createPost_setion 
+  section.createPost_section
     .formPost_container
-      h2 SUBIENDO UNA FOTAZA 
-      form(action="/post/formPost/upload" method="POST" enctype="multipart/form-data") 
-        .form_group
-          #image_upload
-            label(for="image")  Imagen:
-            input(type="file" name="image" id="image" accept="image/png, image/jpeg" placeholder="¡¡Estamos esperando tu FOTAZA!!" required)
-            img.image_preview.oculto#image_preview(alt="Vista previa")
-          #title_image 
+      h2 CREANDO ALBUM DE FOTAZAS 
+      form(action="/post/formPost" method="POST") 
+        #form_post
+          #title_post
             label(for="title") Titulo:
-            input(type="text" name="title" placeholder="Titulo de la imagen..." required)
-          #hasCopyright_image
-            label(for="hasCopyright") Aplicar Copiright?: 
-            input(type="checkbox" name="hasCopyright" id="hasCopyright")
-            #copyright_text.oculto
-              label(for="textCopyright") Texto del Copyright: 
-              input(type="text" name="textCopyright" placeholder="Texto del copyright...")
-          button.submit_post_btn(type="submit") SUBIR
+            input(type="text" name="title" placeholder="Titulo del post..." required)
+          #description_post
+            label(for="description") Descripción:
+            input(type="text" name="description" placeholder="Ingrese una breve descripción...")
+          //-#tags_post
+            label(for="title") Titulo:
+            input(type="text" name="title" placeholder="Titulo del post..." required)
+          button#create_btn.submit_post_btn(type="submit") CREAR ALBUM
+          button#cancel_btn.submit_post_btn(type="button") CANCELAR

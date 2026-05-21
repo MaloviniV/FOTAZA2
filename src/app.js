@@ -1,6 +1,6 @@
 import express from "express";
-import {server} from "./config/config.js";
-import {connectDatabase} from "./config/db.js";
+import { server } from "./config/config.js";
+import { connectDatabase } from "./config/db.js";
 import "./models/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import * as routes from "./routes/indexRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AppError from "./utils/AppError.js";
+import { mockAuth } from "./middlewares/mockAuth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,9 @@ app.use(express.urlencoded({ extended: true })); //Para leer datos de formulario
 app.use(express.json()); //Para leer datos en JSON
 app.use(express.static(path.join(__dirname, "..", "public"))); //Donde buscar archivos estaticos
 
+// Middleware temporal para hardcodear la sesión (mock)
+app.use(mockAuth);
+
 //Middleware de rutas
 app.get("/favicon.ico", (req, res) => res.status(204).end()); //ruta faviconico
 app.use("/post", routes.postRoutes);
@@ -33,18 +37,17 @@ app.use("/auth", routes.authRoutes);
 app.use("/dashboard", routes.privateRoutes);
 app.use("/", routes.publicRoutes);
 
-
 //Manejo de errores
-app.use((req, res, next) => {   //Rutas no encontradas
+app.use((req, res, next) => {
+  //Rutas no encontradas
   next(new AppError(`No se encontro la ruta ${req.originalUrl}`, 404));
 });
-app.use(errorHandler);  //Errores generales
+app.use(errorHandler); //Errores generales
 
 //Levantar el servidor y BD
 (async () => {
   try {
     await connectDatabase();
-
   } catch (error) {
     if (server.debug) {
       console.error("Error al inicializar la base de datos:", error);
@@ -68,4 +71,3 @@ app.use(errorHandler);  //Errores generales
     process.exit(1);
   });
 })();
-

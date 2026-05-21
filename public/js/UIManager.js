@@ -1,10 +1,10 @@
 export class UIManager {
   constructor() {
-    this.searchInput = document.querySelector(".navbar-search-input");
-    this.searchBtn = document.querySelector(".navbar-search-btn");
-    this.loadMoreBtn = document.querySelector(".wall-more-btn");
-    this.gridContainer = document.querySelector(".grid-container");
+    this.searchForm = document.querySelector("#navbar-search-form");
+    this.searchInput = document.querySelector("#navbar-search-input");
     this.navItems = document.querySelectorAll(".nav-item a");
+    this.userBtn = document.querySelector("#user-btn");
+    this.userMenuItem = document.querySelector(".user-menu-item");
   }
 
   init() {
@@ -14,60 +14,50 @@ export class UIManager {
     }
 
     this.#addEventListeners();
-    
+    this.#initUserMenu();
     this.#highlightLink();
 
   }
 
   #addEventListeners() {
-    if(this.searchBtn && this.searchInput){
-      this.searchBtn.addEventListener("click", () => this.#performSearch());
-      this.searchInput.addEventListener("keypress", (e) => {
-        if(e.key === "Enter") this.#performSearch();
-      });
-    }
-
-    if(this.loadMoreBtn) {
-      this.loadMoreBtn.addEventListener("click", async (e) => {
-        const btn = e.target;
-        const offset = btn.dataset.offset; 
-
-        const response = await fetch(`/image/loadImages?offset=${offset}`);
-        const { hasMore, nextOffset, fotos } = await response.json();
-
-        this.#chargeImages(fotos);
-        console.log(btn.dataset.offset);
-        btn.dataset.offset = nextOffset;
-
-        if(!hasMore) btn.style.display = "none";
+    if(this.searchForm && this.searchInput){
+      this.searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.#performSearch();
       });
     }
   }
 
+  //HARDCODEADO HACER FETCH AL SERVIDOR
   #performSearch() {
     const searchTerm = this.searchInput.value.trim();
 
     if(searchTerm){
+      //hardcodeado, fetch al servidor
       console.log(`BUSCAR ${searchTerm}`);
+      this.searchInput.value = "";
     }
   }
 
-  #chargeImages(fotos) {
-    let fragment = document.createDocumentFragment();
-    fotos.forEach(foto => {
-      const div = document.createElement("div");
-      div.classList.add("grid-item");
-
-      const img = document.createElement("img");
-      img.src = `/imagenes/${foto}`;
-      img.alt = "imagen";
-      img.loading = "lazy";
-
-      div.appendChild(img);
-      fragment.appendChild(div);
-    });
-
-    this.gridContainer.appendChild(fragment);
+  #initUserMenu() {
+    if (this.userBtn && this.userMenuItem) {
+      this.userBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        this.userMenuItem.classList.toggle("open");
+      });
+  
+      document.addEventListener("click", (event) => {
+        if (!this.userMenuItem.contains(event.target)) {
+          this.userMenuItem.classList.remove("open");
+        }
+      });
+  
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          this.userMenuItem.classList.remove("open");
+        }
+      });      
+    }
   }
 
   #highlightLink(){

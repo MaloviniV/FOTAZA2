@@ -1,4 +1,6 @@
 import { UIManager } from "./UIManager.js";
 
-const ui = new UIManager();
-ui.init();
+document.addEventListener("DOMContentLoaded", () => {
+  const ui = new UIManager();
+  ui.init();
+});

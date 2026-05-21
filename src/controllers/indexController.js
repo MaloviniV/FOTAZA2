@@ -13,7 +13,8 @@ export const index = (req, res) => {
 
     console.log(fotos);
 
-    res.render("homePublic.pug", { hasMore, nextOffset, fotos });
+    res.render("public/wallPublic.pug", { hasMore, nextOffset, fotos });
+    //res.render("layout.pug");
   });
 };
 

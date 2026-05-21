@@ -1,4 +1,7 @@
-extends layout.pug
+extends ../layout.pug
+block metadata 
+  link(rel="stylesheet", href="/css/wallStyle.css")
+  script(src="/js/wallPublicJS.js" type="module" defer)
 
 block content
   //- --- Seccion de bienvenida ---
@@ -14,6 +17,4 @@ block content
         each foto in fotos
           .grid-item 
             img(src=`/imagenes/${foto}` alt="imagen" loading="lazy")
-      else 
-        p Imagenes no disponibles
     button.wall-more-btn(type="button" data-offset=nextOffset) Cargar Más

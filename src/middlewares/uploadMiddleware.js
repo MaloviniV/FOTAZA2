@@ -22,13 +22,21 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = ["image/jpeg", "image/png", "image/webp"];
+  const allowedExtensions = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "video/mp4",
+    "video/webm",
+  ];
 
   if (allowedExtensions.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(
-      new Error("Formato incorrecto. Solo se permiten JPG, PNG, WEBP y GIF."),
+      new Error(
+        "Formato incorrecto. Solo se permiten imágenes (JPG, PNG, WEBP) y videos (MP4, WEBM).",
+      ),
       false,
     );
   }
@@ -36,6 +44,6 @@ const fileFilter = (req, file, cb) => {
 
 export const uploadMiddleware = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 },
+  limits: { fileSize: 1024 * 1024 * 50 }, // Aumentado a 50MB para soportar videos
   fileFilter: fileFilter,
 });

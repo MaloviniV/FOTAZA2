@@ -1,59 +1,59 @@
 import User from "./User.js";
 import Follow from "./Follow.js";
 import Post from "./Post.js";
-import Image from "./Image.js";
+import File from "./File.js";
 
 //USER->FOLLOW(m..n)
 User.belongsToMany(User, {
   through: Follow,
   as: "following",
   foreignKey: "followerId",
-  otherKey: "followingId"
+  otherKey: "followingId",
 });
 
 User.belongsToMany(User, {
-  through: Follow,  //indica la tabla que se usara como intermedia
+  through: Follow, //indica la tabla que se usara como intermedia
   as: "followers",
-  foreignKey: "followingId",  //usuario consultado
-  otherKey: "followerId"  //usuarios devueltos
+  foreignKey: "followingId", //usuario consultado
+  otherKey: "followerId", //usuarios devueltos
 });
 
-User.hasMany(Follow,{
+User.hasMany(Follow, {
   foreignKey: "followerId",
-  sourceKey: "id" //busca en modelo origen
+  sourceKey: "id", //busca en modelo origen
 });
 
-Follow.belongsTo(User,{
+Follow.belongsTo(User, {
   foreignKey: "followerId",
-  targetKey: "id"
+  targetKey: "id",
 });
 
-User.hasMany(Follow,{
+User.hasMany(Follow, {
   foreignKey: "followingId",
-  sourceKey: "id" //busca en modelo origen
+  sourceKey: "id", //busca en modelo origen
 });
 
 Follow.belongsTo(User, {
   foreignKey: "followingId",
-  targetKey: "id"
+  targetKey: "id",
 });
 //USER->POST (1..n)
 User.hasMany(Post, {
   foreignKey: "idUser",
-  sourceKey: "id"
+  sourceKey: "id",
 });
 
 Post.belongsTo(User, {
   foreignKey: "idUser",
-  targetKey: "id"
+  targetKey: "id",
 });
 //POST->IMAGE
-Post.hasMany(Image, {
+Post.hasMany(File, {
   foreignKey: "idPost",
   sourceKey: "id",
 });
 
-Image.belongsTo(Post, {
+File.belongsTo(Post, {
   foreignKey: "idPost",
-  targetKey: "id"
+  targetKey: "id",
 });

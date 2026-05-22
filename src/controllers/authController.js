@@ -1,41 +1,56 @@
+import User from "../models/User.js";
+
 export const login = (req, res) => {
-  const {username, name, register} = req.query;
+  const { email, name, register } = req.query;
   res.render("auth/formLogin.pug", {
-    username: username,
+    email: email,
     name: name,
-    isRegister: register
+    isRegister: register,
   });
-}
+};
 
 export const processLogin = (req, res) => {
-  const {username, password} = req.body;
+  const { email, password } = req.body;
 
   //### usuarioValido HARDCODEADO, VERIFICAR EN BD ###
   const usuarioValido = true;
-  
-  if(usuarioValido){
-    res.redirect("/dashboard");
-  }else{
+
+  if (usuarioValido) {
+    res.redirect("/dashboard/?login=true");
+  } else {
     res.render("auth/formLogin", {
-      error: "Usuario o contraseña incorrectos",
-      username: username
+      error: "Email o contraseña incorrectos",
+      email: email,
     });
   }
-}
+};
 
 export const register = (req, res) => {
   res.render("auth/formRegister.pug");
-}
+};
 
-export const prossesRegister = (req, res) => {
-  const {longname, name, birthdate, username, password} = req.body;
+export const prossesRegister = async (req, res) => {
+  const { firstName, lastName, dni, birthdate, nickname, email, password } = req.body;
 
-   //### registroValido HARDCODEADO, VERIFICAR EN BD ###
-  const registroValido = true;
+  try {
+    //*****ENCRIPTAR CONTRASEÑA*****
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      nickname,
+      dni,
+      birthdate,
+      email,
+      password
+    });
 
-  if(registroValido){
-    console.log
-    
-    res.redirect(`login?username=${username}&name=${name}&register=true`);
+    res.redirect(`/auth/login?email=${newUser.email}&name=${newUser.firstName}&register=true`);
+  } catch (error) {
+    console.error("Error al registrarse en BD:", error);
+    res.render("auth/formRegister.pug",{error: "Usted ya esta registrado"});
   }
-}
+};
+
+export const logout = (req, res) => {
+  res.redirect("/?logout=true");
+};

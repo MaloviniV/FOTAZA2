@@ -6,7 +6,11 @@ mixin successConfirmation(message, title, primaryBtn, primaryUrl, secondaryBtn)
       p= message || "La acción se ha realizado correctamente."
       
       .confirmation-actions
-        a.submit_post_btn.success-btn(href=(primaryUrl || "/dashboard"))= primaryBtn || "Volver al Inicio"
+        if primaryBtn
+          if primaryUrl
+            a.submit_post_btn.success-btn(href=primaryUrl)= primaryBtn
+          else
+            button.submit_post_btn.success-btn(type="button" onclick="this.closest('.confirmation-modal').style.display='none'")= primaryBtn
         if secondaryBtn
           button.submit_post_btn.cancel-btn(type="button" onclick="this.closest('.confirmation-modal').style.display='none'")= secondaryBtn
 

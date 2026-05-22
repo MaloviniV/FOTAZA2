@@ -11,18 +11,11 @@ export const index = (req, res) => {
     const fotos = files.slice(offset, nextOffset);
     const hasMore = nextOffset < files.length;
 
-    console.log(fotos);
 
     res.render("public/wallPublic.pug", { hasMore, nextOffset, fotos });
-    //res.render("layout.pug");
   });
 };
-
+/* 
 export const contact = (req, res) => {
   res.send("Formulario de contacto");
-}
-
-export const plans = (req, res) => {
-  res.render("plans.pug");
-}
-
+} */

@@ -1,21 +1,23 @@
 extends ../layout.pug
+include ../mixin/uploadConfirmation.pug
 
 block metadata 
   link(rel="stylesheet", href="/css/authStyle.css")
 
 block content 
+  if isRegister
+    +successConfirmation(
+      "Registro Exitoso!!!.",
+      `¡¡BIENVENIDO ${name}!!`,
+      "Aceptar"
+    )
   section.login-section
     .form-container
       h2 Iniciar Sesión
-      if isRegister
-        p.welcome ¡Registro correcto! Bienvenido
-          br
-          span#user-display Ya puedes iniciar sesión.
-
       form(action="/auth/login" method="POST")
         .form-group
-          label(for="username") Usuario o Email:
-          input#username.form-control(type="text" name="username" placeholder="Ingresa tu usuario" value=username required)
+          label(for="email") Email:
+          input#email.form-control(type="email" name="email" placeholder="Ingresa tu email" value=email required)
         .form-group
           label(for="password") Contraseña:
           input#password.form-control(type="password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="new-password")

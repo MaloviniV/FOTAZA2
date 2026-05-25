@@ -1,27 +1,57 @@
 document.addEventListener("DOMContentLoaded", () => {
   const tabs = document.querySelectorAll(".nav-tab");
-  const wallNavegation = document.getElementById("wall-navegation");
+  const divButtons = document.getElementById("bottons-container");
+  const divCards = document.getElementById("cards-container");
 
   //Cargo el contenido de cada pestaña
-  const loadTabContent = async (tabId) => {
+  const loadTabContent = (tabId) => {
+    divButtons.innerHTML = "";
+    divCards.innerHTML = "";
     //Muestro el estado de carga
-    wallNavegation.innerHTML =
-      "<p class='loading-text'>Cargando contenido...</p>";
+    divButtons.innerHTML = "<p class='loading-text'>Cargando contenido...</p>";
+
+    let fragmentCards = document.createDocumentFragment();
 
     try {
       //***** HARDCODEADO FECTCH AL SERVIDOR *****/
-      setTimeout(() => {
+      setTimeout(async () => {
+        divButtons.innerHTML = "";
         if (tabId === "posts-btn") {
-          wallNavegation.innerHTML = `
-            <div class="posts-grid">
-              <img src="https://picsum.photos/id/10/300/300" alt="Post 1">
-              <img src="https://picsum.photos/id/11/300/300" alt="Post 2">
-              <img src="https://picsum.photos/id/12/300/300" alt="Post 3">
-              <img src="https://picsum.photos/id/13/300/300" alt="Post 4">
-              <img src="https://picsum.photos/id/14/300/300" alt="Post 5">
-              <img src="https://picsum.photos/id/15/300/300" alt="Post 6">
-            </div>
-          `;
+          const response = await fetch("/post/posts");
+    
+          const postsList = await response.json();
+
+          const button = document.createElement("button");
+          button.textContent = "Nuevo post";
+          button.setAttribute("id","newPost-btn");
+          divButtons.appendChild(button);
+
+          postsList.forEach(post => {
+            const cardPost = document.createElement("div");
+            cardPost.classList.add("cardPost-container");
+            cardPost.title = post.title;
+
+              const containerImage = document.createElement("div");
+              containerImage.classList.add("image-container");
+
+                const postImage = document.createElement("img");
+                postImage.src = post.path;
+                postImage.alt = post.title;
+                containerImage.appendChild(postImage);
+            
+              const metadata = document.createElement("div");
+              metadata.classList.add("metadata-container");
+
+                const title = document.createElement("h3");
+                title.textContent = post.title;
+                metadata.appendChild(title);
+
+              cardPost.append(containerImage, metadata);
+            fragmentCards.append(cardPost);
+          });
+
+          divCards.appendChild(fragmentCards);
+
         } else if (tabId === "colections-btn") {
           wallNavegation.innerHTML = `
             <div class="collections-list">
@@ -55,10 +85,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
         }
+
+        
       }, 300);
     } catch (error) {
       console.error("Error al cargar el contenido de la pestaña:", error);
-      wallNavegation.innerHTML =
+      divButtons.innerHTML =
         "<p class='error-text'>Error al cargar el contenido.</p>";
     }
   };

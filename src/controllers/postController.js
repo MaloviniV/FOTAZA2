@@ -93,12 +93,18 @@ export const processFormUploadFile = async (req, res) => {
 
 export const posts = (req, res) => {
   const postsList = [
-    { id: 1, title: "Aventura en la Montaña", image: "1.webp" },
-    { id: 2, title: "Viaje a la Playa", image: "1.webp" },
-    { id: 3, title: "Paisajes Urbanos", image: "1.webp" },
+    { id: 1, title: "Aventura en la Montaña", image: "1.webp", path:"https://picsum.photos/id/10/300/300"},
+    { id: 2, title: "Viaje a la Playa", image: "1.webp", path:"https://picsum.photos/id/11/300/300" },
+    { id: 3, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/12/300/300" },
+    { id: 4, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/13/300/300" },
+    { id: 5, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/14/300/300" },
+    { id: 6, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/15/300/300" },
+    { id: 7, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/16/300/300" },
+    { id: 8, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/17/300/300" },
+    { id: 9, title: "Paisajes Urbanos", image: "1.webp", path:"https://picsum.photos/id/18/300/300" },
   ];
 
-  res.render("post/posts.pug", { posts: postsList });
+  res.send(postsList);
 };
 
 export const postDetail = (req, res) => {

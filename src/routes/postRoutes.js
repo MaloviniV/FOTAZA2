@@ -11,7 +11,7 @@ router.get("/uploadFile", formUploadFile)
 router.post("/formUploadFile", uploadMiddleware.single("file"), processFormUploadFile)
 
 
-router.get("/", posts);
+router.get("/posts", posts);
 //router.get("/:id", postDetail);
 //router.post("/imageDetail", imageDetail);
 

@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const { hasMore, nextOffset, fotos } = await response.json();
 
         let fragment = document.createDocumentFragment();
+
         fotos.forEach(foto => {
           const div = document.createElement("div");
           div.classList.add("grid-item");

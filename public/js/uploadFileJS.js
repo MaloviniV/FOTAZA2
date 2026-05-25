@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadBtn = document.getElementById("upload_btn");
   const cancelBtn = document.getElementById("cancel_btn");
   const form = document.getElementById("form_uploadFile");
+  const tagsSelect = document.getElementById("tags");
 
   //Previsializacion del archivo
   if (fileInput) {
@@ -55,5 +56,21 @@ document.addEventListener("DOMContentLoaded", () => {
     cancelBtn.addEventListener("click", () => {
       window.location.href = "/dashboard"; // O a donde prefieras redirigir
     });
+  }
+
+  //Manejo de los tags mediante Slim Select
+  if (tagsSelect) {
+    try {
+      new SlimSelect({
+        select: "#tags",
+        settings: {
+          placeholderText: "Buscar etiqueta...",
+          searchText: "No se encontraron etiquetas",
+          searchPlaceholder: "Buscar...",
+        },
+      });
+    } catch (error) {
+      console.error("Error al inicializar Slim Select:", error);
+    }
   }
 });

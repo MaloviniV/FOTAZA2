@@ -12,3 +12,20 @@ export const STATUS_FOLLOW = {
 };
 
 export const LIST_STATUS_FOLLOW = Object.values(STATUS_FOLLOW);
+
+export const TAGS = Object.freeze({
+  PAISAJE: "Paisaje",
+  RETRATO: "Retrato",
+  URBANO: "Urbano",
+  NATURALEZA: "Naturaleza",
+  ARQUITECTURA: "Arquitectura",
+  BLANCO_Y_NEGRO: "Blanco y Negro",
+  NOCTURNA: "Nocturna",
+  MACRO: "Macro",
+  ASTROFOTOGRAFIA: "Astrofotografía",
+  MINIMALISMO: "Minimalismo",
+  DEPORTES: "Deportes",
+  VIAJES: "Viajes"
+});
+
+export const LIST_TAGS = Object.values(TAGS);

@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 import * as routes from "./routes/indexRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AppError from "./utils/AppError.js";
-import { mockAuth } from "./middlewares/mockAuth.js";
+import { requireAuth } from "./middlewares/authMidleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,15 +26,19 @@ app.use(express.urlencoded({ extended: true })); //Para leer datos de formulario
 app.use(express.json()); //Para leer datos en JSON
 app.use(express.static(path.join(__dirname, "..", "public"))); //Donde buscar archivos estaticos
 
-// Middleware temporal para hardcodear la sesión (mock)
-app.use(mockAuth);
+// HARDCODEAR SESION GLOBAL
+app.use((req, res, next) => {
+  req.user = global.currentUser || null;
+  res.locals.user = global.currentUser || null;
+  next();
+});
 
 //Middleware de rutas
 app.get("/favicon.ico", (req, res) => res.status(204).end()); //ruta faviconico
 app.use("/post", routes.postRoutes);
 app.use("/image", routes.apiRoutes);
 app.use("/auth", routes.authRoutes);
-app.use("/dashboard", routes.privateRoutes);
+app.use("/dashboard", requireAuth, routes.privateRoutes);
 app.use("/", routes.publicRoutes);
 
 //Manejo de errores
@@ -45,9 +49,17 @@ app.use((req, res, next) => {
 app.use(errorHandler); //Errores generales
 
 //Levantar el servidor y BD
+import User from "./models/User.js";
 (async () => {
   try {
     await connectDatabase();
+//FORZADO DE INICIO DE SESION CON USUARIO EN BD
+    const testUser = await User.findOne({ where: { email: "mail@mail.com" } });
+    if (testUser) {
+      const userData = testUser.toJSON();
+      global.currentUser = userData;
+    }
+
   } catch (error) {
     if (server.debug) {
       console.error("Error al inicializar la base de datos:", error);

@@ -36,7 +36,14 @@ Post.init(
     modelName: "Post",
     tableName: "posts",
     timestamps: true,
-    paranoid: true
+    paranoid: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['idUser', 'title'],
+        name: 'unique_title'
+      }
+    ]
   }
 );
 

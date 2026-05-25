@@ -1,9 +1,18 @@
 extends ../layout.pug
+include ../mixin/uploadConfirmation.pug
+
 block metadata 
   link(rel="stylesheet", href="/css/wallStyle.css")
   script(src="/js/wallPublicJS.js" type="module" defer)
 
 block content
+  if expiredSession
+    +successConfirmation(
+      "Sesion Expirada",
+      `${expiredSession}`,
+      "Aceptar"
+    )
+
   //- --- Seccion de bienvenida ---
   section#main-welcome
     h1 Aquí es donde comienza un gran trabajo

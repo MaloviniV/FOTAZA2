@@ -3,10 +3,12 @@ import { formUploadFile, processFormUploadFile, formPost, processFormPost, posts
 import { uploadMiddleware } from "../middlewares/uploadMiddleware.js";
 
 const router = Router();
-router.get("/uploadFile", formUploadFile)
-router.post("/formUploadFile", uploadMiddleware.single("file"), processFormUploadFile)
+
 router.get("/formPost", formPost);
 router.post("/formPost", processFormPost);
+
+router.get("/uploadFile", formUploadFile)
+router.post("/formUploadFile", uploadMiddleware.single("file"), processFormUploadFile)
 
 
 router.get("/", posts);

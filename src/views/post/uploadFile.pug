@@ -3,6 +3,8 @@ include ../mixin/uploadConfirmation.pug
 
 block metadata 
     link(rel="stylesheet", href="/css/uploadFileStyle.css")
+    link(href="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.css" rel="stylesheet")
+    script(src="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.min.js" defer)
     script(src="/js/uploadFileJS.js" type="module" defer)
 
 block content
@@ -13,6 +15,12 @@ block content
       "Volver al Inicio",
       "/dashboard",
       "Subir otro archivo"
+    )
+  else if error
+    +successConfirmation(
+      error,
+      "¡Error al guardar!",
+      "Aceptar"
     )
 
   section
@@ -27,29 +35,30 @@ block content
           #title_Post
             label(for="post") ALBUM:
             input(type="text" name="post" value=titlePost readonly)
+            input(type="hidden" name="idPost" value=idPost)
           #title_image 
             label(for="title") Titulo:
-            input(type="text" name="title" placeholder="Titulo del archivo..." required)
+            input(type="text" name="title" placeholder="Titulo del archivo..." required value=title)
           #description 
             label(for="description") DESCRIPCIÓN: 
-            input(type="text" name="description" placeholder="Ingresa una breve descripcion...")
-          #tags
+            input(type="text" name="description" placeholder="Ingresa una breve descripcion..." value=description)
+          #tags_container
             label(for="tags") TAGS: 
             select(name="tags" id="tags" multiple)
-              if tags
+              if (tags && tags.length > 0)
                 each tag in tags 
                   option(value=tag)= tag.charAt(0).toUpperCase() + tag.slice(1)
               else
                 option(value="")= "Sin Etiquetas"
-          #openComments
+          #openComments_container
             label(for="openComments") Permitir comentarios?: 
-            input(type="checkbox" name="openComments" id="openComments")
+            input(type="checkbox" name="openComments" id="openComments" value="true" checked=(openComments ? true : false))
           #hasCopyright_image
             label(for="hasCopyright") Aplicar Copiright?: 
             input(type="checkbox" name="hasCopyright" id="hasCopyright")
             #copyright_text.oculto
               label(for="textCopyright") Texto del Copyright: 
-              input(type="text" name="textCopyright" placeholder="Texto del copyright...")
+              input(type="text" name="textCopyright" placeholder="Texto del copyright..." value=textCopyright)
         #uploadFile_btn
           button#upload_btn(type="submit") SUBIR
           button#cancel_btn(type="button") CANCELAR

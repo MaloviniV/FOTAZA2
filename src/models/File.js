@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
+import { LIST_TAGS } from "../utils/constants.js";
 
 class File extends Model {}
 
@@ -22,8 +23,12 @@ File.init(
       type: DataTypes.STRING(30),
       allowNull: false,
     },
-    file_path: {
+    path: {
       type: DataTypes.STRING(200),
+      allowNull: false,
+    },
+    mimetype: {
+      type: DataTypes.STRING(50),
       allowNull: false,
       validate: {
         is: {
@@ -32,11 +37,27 @@ File.init(
         }
       }
     },
-    mime_file: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
+    description: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
     },
-    copyrigth: {
+    tags: {
+      type: DataTypes.ARRAY(DataTypes.STRING(50)),
+      defaultValue: [],
+      validate: {
+        validationTags(value){
+          if(!Array.isArray(value)) throw new Error("Los tags debe ser un Array");
+          value.forEach(tag => {
+            if(!LIST_TAGS.includes(tag)) throw new Error(`El Tag ${tag} no es válido`);            
+          });          
+        }
+      }
+    },
+    openComments: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    textCopyright: {
       type: DataTypes.STRING(50),
       allowNull: true,
     },

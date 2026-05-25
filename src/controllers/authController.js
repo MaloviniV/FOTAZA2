@@ -9,18 +9,25 @@ export const login = (req, res) => {
   });
 };
 
-export const processLogin = (req, res) => {
+export const processLogin = async (req, res) => {
   const { email, password } = req.body;
 
-  //### usuarioValido HARDCODEADO, VERIFICAR EN BD ###
-  const usuarioValido = true;
+  try {
+    const user = await User.findOne( {where: {email} });
 
-  if (usuarioValido) {
-    res.redirect("/dashboard/?login=true");
-  } else {
-    res.render("auth/formLogin", {
-      error: "Email o contraseña incorrectos",
-      email: email,
+    if (user && user.password === password) {
+      global.currentUser = {
+        ...user.toJSON()
+      }
+      res.redirect(`/dashboard`);
+    } else {
+        throw new Error("Email o contraseña incorrectos");
+    }
+  } catch (error) {
+    console.error("Error al procesar el login:", error);
+    res.render("auth/formLogin.pug", {
+      error: (error.message || "Ocurrió un error al intentar iniciar sesión."),
+      email
     });
   }
 };
@@ -52,5 +59,6 @@ export const prossesRegister = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.redirect("/?logout=true");
+  global.currentUser = null;
+  res.redirect("/");
 };

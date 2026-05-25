@@ -1,10 +1,19 @@
 extends ../layout.pug
+include ../mixin/uploadConfirmation.pug
 
 block metadata 
   link(rel="stylesheet", href="/css/formPostStyle.css")
   script(src="/js/formPostJS.js" type="module" defer) 
 
+
 block content
+  if error
+    +successConfirmation(
+      error,
+      "¡Error al crear el album!",
+      "aceptar"
+    )
+
   section.createPost_section
     .formPost_container
       h2 CREANDO ALBUM DE FOTAZAS 
@@ -12,10 +21,10 @@ block content
         #form_post
           #title_post
             label(for="title") Titulo:
-            input(type="text" name="title" placeholder="Titulo del post..." required)
+            input(type="text" name="title" placeholder="Titulo del post..." value=title required)
           #description_post
             label(for="description") Descripción:
-            input(type="text" name="description" placeholder="Ingrese una breve descripción...")
+            input(type="text" name="description" placeholder="Ingrese una breve descripción..." value=description)
           //-#tags_post
             label(for="title") Titulo:
             input(type="text" name="title" placeholder="Titulo del post..." required)

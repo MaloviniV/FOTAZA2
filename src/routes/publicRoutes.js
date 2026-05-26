@@ -5,6 +5,4 @@ const router = Router();
 
 router.get("/", index);
 
-//router.get("/contacto", contact);
-
 export default router;

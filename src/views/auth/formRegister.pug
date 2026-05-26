@@ -1,12 +1,12 @@
 extends ../layout.pug
-include ../mixin/uploadConfirmation.pug
+include ../mixin/feedbackModal.pug
 
 block metadata 
   link(rel="stylesheet", href="/css/authStyle.css")
   
 block content 
   if error
-    +successConfirmation(
+    +feedbackModal(
       "Error en el registro!!!.",
       error,
       "Aceptar"

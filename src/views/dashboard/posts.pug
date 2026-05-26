@@ -1,0 +1,32 @@
+extends ../layout.pug
+
+block metadata
+  link(rel="stylesheet", href="/css/postsStyle.css")
+
+block content
+  section.dashboard-section
+    .header-actions
+      h2 Mis Posts
+      a.action-btn.secondary(href="/dashboard") Volver al Dashboard
+      a.action-btn.primary(href="/post/formPost") + Nuevo Post
+
+    //- Contenedor donde irán las tarjetas de los posts
+    #cards-container.posts-grid
+      if posts && posts.length > 0
+        each post in posts
+          a.cardPost-container(href=`/post/postDetail/${post.id}`)
+            .image-container
+              if post.Files && post.Files.length > 0
+                img(src=post.Files[0].path alt=post.title)
+              else
+                img(src="/imagenes/default-image.png" alt="Sin imagen")
+
+              p.files-count #{post.Files ? post.Files.length : 0} archivo(s)
+            .metadata-container
+              h3= post.title
+              p= post.description
+
+      else if error 
+        p.empty-message= error
+      else
+        p.empty-message Aún no tienes ningún post. ¡Anímate a subir tu primera foto!

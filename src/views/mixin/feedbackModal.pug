@@ -1,0 +1,119 @@
+//- mixin genérico para manejar mensajes de Éxito, Error o Información
+mixin feedbackModal(type, title, message, primaryBtnText, primaryBtnLink, secondaryBtnText, secondaryBtnLink)
+  .modal-overlay(class=`modal-${type}`)
+    .modal-box
+      .modal-icon
+        if type === 'error'
+          span.icon-error ❌
+        else if type === 'success'
+          span.icon-success ✅
+        else 
+          span.icon-info ℹ️
+          
+      h3.modal-title= title
+      p.modal-message= message
+      
+      .modal-buttons
+        //- Botón Primario
+        if primaryBtnText
+          if primaryBtnLink
+            a.action-btn.primary(href=primaryBtnLink)= primaryBtnText
+          else
+            //- Si no hay link, actúa como un botón para cerrar el modal
+            button.action-btn.primary(type="button" onclick="this.closest('.modal-overlay').style.display='none'")= primaryBtnText
+        
+        //- Botón Secundario (Opcional)
+        if secondaryBtnText
+          if secondaryBtnLink
+            a.action-btn.secondary(href=secondaryBtnLink)= secondaryBtnText
+          else
+            button.action-btn.secondary(type="button" onclick="this.closest('.modal-overlay').style.display='none'")= secondaryBtnText
+
+
+
+  style. 
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .modal-icon span {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      margin: 0 0 0.5rem 0;
+      color: #1e293b;
+    }
+
+    .modal-message {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action-btn,
+    .action-btn:link,
+    .action-btn:visited {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+      padding: 0.9rem 1.3rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    }
+
+    .action-btn.primary {
+      background-color: #3182ce;
+      color: #ffffff;
+      box-shadow: 0 6px 18px rgba(49, 130, 206, 0.18);
+    }
+
+    .action-btn.primary:hover {
+      background-color: #2563eb;
+    }
+
+    .action-btn.secondary {
+      background-color: #f1f5f9;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    .action-btn.secondary:hover {
+      background-color: #e2e8f0;
+    }
+
+    .action-btn:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }

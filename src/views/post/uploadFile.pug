@@ -1,5 +1,5 @@
 extend ../layout.pug
-include ../mixin/uploadConfirmation.pug
+include ../mixin/feedbackModal.pug
 
 block metadata 
     link(rel="stylesheet", href="/css/uploadFileStyle.css")
@@ -8,18 +8,21 @@ block metadata
     script(src="/js/uploadFileJS.js" type="module" defer)
 
 block content
-  if uploadSuccess
-    +successConfirmation(
-      "El archivo se ha guardado correctamente.",
+  if success
+    +feedbackModal(
+      "success",
       "¡Subida Exitosa!",
-      "Volver al Inicio",
-      "/dashboard",
-      "Subir otro archivo"
+      "El archivo se ha guardado correctamente.",
+      "Subir otro Archivo",
+      success.uploadLink,
+      "Ver mis Posts",
+      "/dashboard/posts"
     )
   else if error
-    +successConfirmation(
+    +feedbackModal(
+      "error",
+      "¡Error al guardar el archivo!",
       error,
-      "¡Error al guardar!",
       "Aceptar"
     )
 
@@ -33,8 +36,8 @@ block content
           video.video_preview.oculto#video_preview(controls)
         #metadata_file 
           #title_Post
-            label(for="post") ALBUM:
-            input(type="text" name="post" value=titlePost readonly)
+            label(for="titlePost") ALBUM:
+            input(type="text" name="titlePost" value=titlePost readonly)
             input(type="hidden" name="idPost" value=idPost)
           #title_image 
             label(for="title") Titulo:
@@ -43,13 +46,13 @@ block content
             label(for="description") DESCRIPCIÓN: 
             input(type="text" name="description" placeholder="Ingresa una breve descripcion..." value=description)
           #tags_container
-            label(for="tags") TAGS: 
-            select(name="tags" id="tags" multiple)
-              if (tags && tags.length > 0)
-                each tag in tags 
-                  option(value=tag)= tag.charAt(0).toUpperCase() + tag.slice(1)
-              else
-                option(value="")= "Sin Etiquetas"
+            label(for="selectedTags") TAGS:
+            if (listTags && listTags.length > 0)
+              select(name="selectedTags" id="tags" multiple)
+                each tag in listTags 
+                  option(value=tag selected=(selectedTags && selectedTags.includes(tag)))= tag.charAt(0).toUpperCase() + tag.slice(1)
+            else
+                p= "Sin Etiquetas"
           #openComments_container
             label(for="openComments") Permitir comentarios?: 
             input(type="checkbox" name="openComments" id="openComments" value="true" checked=(openComments ? true : false))

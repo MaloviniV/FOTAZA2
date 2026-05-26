@@ -1,5 +1,6 @@
 import {Model, DataTypes} from "sequelize";
 import { sequelize } from "../config/db.js";
+import { LIST_TAGS } from "../utils/constants.js";
 
 class Post extends Model {}
 
@@ -26,7 +27,19 @@ Post.init(
       type: DataTypes.STRING(200),
       allowNull: true
     },
-    comments_enabled: {
+    selectedTags: {
+      type: DataTypes.ARRAY(DataTypes.STRING(50)),
+      defaultValue: [],
+      validate: {
+        validationTags(value){
+          if(!Array.isArray(value)) throw new Error("Los tags debe ser un Array");
+          value.forEach(tag => {
+            if(!LIST_TAGS.includes(tag)) throw new Error(`El Tag ${tag} no es válido`);            
+          });          
+        }
+      }
+    },
+    openComments: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     }

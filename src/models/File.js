@@ -41,7 +41,7 @@ File.init(
       type: DataTypes.STRING(200),
       allowNull: true,
     },
-    tags: {
+    selectedTags: {
       type: DataTypes.ARRAY(DataTypes.STRING(50)),
       defaultValue: [],
       validate: {

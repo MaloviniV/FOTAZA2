@@ -34,11 +34,10 @@ app.use((req, res, next) => {
 });
 
 //Middleware de rutas
-app.get("/favicon.ico", (req, res) => res.status(204).end()); //ruta faviconico
 app.use("/post", routes.postRoutes);
-app.use("/image", routes.apiRoutes);
+//app.use("/image", routes.apiRoutes);
 app.use("/auth", routes.authRoutes);
-app.use("/dashboard", requireAuth, routes.privateRoutes);
+app.use("/dashboard", requireAuth, routes.dashboardRoutes);
 app.use("/", routes.publicRoutes);
 
 //Manejo de errores
@@ -50,16 +49,19 @@ app.use(errorHandler); //Errores generales
 
 //Levantar el servidor y BD
 import User from "./models/User.js";
+import { seedTestData } from "./seeders/testSeeder.js";
 (async () => {
   try {
     await connectDatabase();
-//FORZADO DE INICIO DE SESION CON USUARIO EN BD
+    //FORZADO DE INICIO DE SESION CON USUARIO EN BD
     const testUser = await User.findOne({ where: { email: "mail@mail.com" } });
     if (testUser) {
       const userData = testUser.toJSON();
       global.currentUser = userData;
-    }
 
+      // Ejecutar los datos de prueba
+      await seedTestData(testUser);
+    }
   } catch (error) {
     if (server.debug) {
       console.error("Error al inicializar la base de datos:", error);

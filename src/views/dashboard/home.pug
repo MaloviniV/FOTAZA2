@@ -2,7 +2,6 @@ extends ../layout.pug
 
 block metadata
   link(rel="stylesheet", href="/css/dashboardStyle.css")
-  script(src="/js/dashboardJS.js" type="module" defer)
 
 block content
   //- --- Seccion CABECERA ---
@@ -21,14 +20,18 @@ block content
       else 
         h2 No hay usuario cargado
 
-  //- --- SECCCION DE NAVEGACION ---
-  section#main-navegation
-    //- --- DIV PESTAÑAS ---
-    #bottons-navegation
-      button#posts-btn.nav-tab.active(type="button") POSTS
-      button#colections-btn.nav-tab(type="button") COLECCIONES
-      button#following-btn.nav-tab(type="button") SEGUIDOS
-    //- --- DIV MURO DE TRABAJO ---
-    #wall-navegation
-      #bottons-container
-      #cards-container
+    //- Accesos a las vistas
+    .views-navigation-container
+      h3 Explora tu contenido
+      .nav-cards
+        a.nav-card(href="/dashboard/posts")
+          h4 Mis Posts
+          p Administra y visualiza todas tus fotografías subidas.
+        
+        a.nav-card(href="/dashboard/collections")
+          h4 Colecciones
+          p Organiza tus fotos favoritas en diferentes álbumes.
+          
+        a.nav-card(href="/dashboard/following")
+          h4 Seguidos
+          p Mira la actividad y las fotos de las personas que sigues.

@@ -1,17 +1,30 @@
 extends ../layout.pug
-include ../mixin/uploadConfirmation.pug
+include ../mixin/feedbackModal.pug
 
 block metadata 
   link(rel="stylesheet", href="/css/formPostStyle.css")
+  link(href="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.css" rel="stylesheet")
+  script(src="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.min.js" defer)
   script(src="/js/formPostJS.js" type="module" defer) 
 
 
 block content
-  if error
-    +successConfirmation(
-      error,
+  if success
+    +feedbackModal(
+      "success",
+      "¡Álbum Creado!",
+      "El álbum se creó correctamente.",
+      "Subir Imagen",
+      success.uploadLink,
+      "Ver mis Posts",
+      "/dashboard/posts"
+    )
+  else if error
+    +feedbackModal(
+      "error",
       "¡Error al crear el album!",
-      "aceptar"
+      error,
+      "Aceptar"
     )
 
   section.createPost_section
@@ -25,8 +38,18 @@ block content
           #description_post
             label(for="description") Descripción:
             input(type="text" name="description" placeholder="Ingrese una breve descripción..." value=description)
-          //-#tags_post
-            label(for="title") Titulo:
-            input(type="text" name="title" placeholder="Titulo del post..." required)
-          button#create_btn.submit_post_btn(type="submit") CREAR ALBUM
-          button#cancel_btn.submit_post_btn(type="button") CANCELAR
+          #tags_container
+            label(for="selectedTags") TAGS:
+            if (listTags && listTags.length > 0)
+              select(name="selectedTags" id="tags" multiple)
+                each tag in listTags 
+                  option(value=tag selected=(selectedTags && selectedTags.includes(tag)))= tag.charAt(0).toUpperCase() + tag.slice(1)
+            else
+                p= "Sin Etiquetas"
+          #openComments_container
+            label(for="openComments") Permitir comentarios?: 
+            input(type="checkbox" name="openComments" id="openComments" value="true" checked=openComments)
+            
+          #buttons_container
+            button#cancel_btn.submit_post_btn(type="button") CANCELAR
+            button#create_btn.submit_post_btn(type="submit") CREAR ALBUM

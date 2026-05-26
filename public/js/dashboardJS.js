@@ -107,6 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  divButtons.addEventListener("click", (e) => {
+    if (e.target.id === "newPost-btn") {
+      // Acción para crear post
+    }
+  });
+
   // CARGO LOS "POSTS" AL INICIAR LA PAGINA
   loadTabContent("posts-btn");
 });

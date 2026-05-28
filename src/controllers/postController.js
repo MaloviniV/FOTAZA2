@@ -2,13 +2,28 @@ import Post from "../models/Post.js";
 import File from "../models/File.js";
 import { LIST_TAGS, TAGS } from "../utils/constants.js";
 //ENVIA EL FORMULARIO PARA CREAR ALBUM
-export const formPost = (req, res) => {
-  res.render("post/formPost.pug", {listTags:LIST_TAGS});
+export const formPost = async (req, res) => {
+  const postId = req.query?.postId;
+  let post;
+  if(postId){
+    try {
+      const response = await Post.findByPk(postId);
+
+      if(!response) throw new Error("No se encontro el album");
+
+      post = response.toJSON();
+
+    } catch (error) {
+      console.error("Error al recuperar el album en la BD", error);
+      return res.render("post/postDetail.pug", {error: error.message});
+    }
+  }
+
+  res.render("post/formPost.pug", {listTags:LIST_TAGS, ...post});
 };
 
-//PROCESA EL FORMULARIO DEL ALBUM
+//GUARDA EL ALBUM EN LA BD
 export const processFormPost = async (req, res) => {
-  //CARGO EL ALBUM EN LA BD
   const userId = req.user.id;
   let { title, description, selectedTags, openComments } = req.body;
   
@@ -30,7 +45,7 @@ export const processFormPost = async (req, res) => {
         description,
         selectedTags,
         openComments
-      },
+      }
     });
 
     if (!created) {
@@ -59,6 +74,37 @@ export const processFormPost = async (req, res) => {
     });
   }
 };
+
+//MODIFICAR EL ALBUM EN LA BD
+export const updateFormPost = async () => {
+  let { postId, title, description, selectedTags, openComments } = req.body;
+
+  try {
+    if (!selectedTags){
+      throw new Error("Debe seleccionar al menos una etiqueta (TAG).");    
+    }else if(!Array.isArray(selectedTags)){
+      selectedTags = [selectedTags];
+    }
+
+    const rowsUpdated = await Post.update({
+      title,
+      description,
+      selectedTags,
+      openComments
+    },{
+      where: {postId}
+    });
+
+    if(rowsUpdated != 1){
+      throw new Error("No se pudo actualiza el Album");      
+    }else{
+      
+    }
+
+  } catch (error) {
+    
+  }
+}
 
 //ENVIA EL FORMULARIO PARA CARGAR 1 IMAGEN
 export const formUploadFile = (req, res) => {
@@ -106,13 +152,26 @@ export const processFormUploadFile = async (req, res) => {
   }
 };
 
-export const showPostDetail = (req, res) => {
+export const showPostDetail = async (req, res) => {
   //console.log(JSON.stringify(req.params, null, 2));
   const postId = req.params.postId;
   
-  
-  res.render("post/postDetail.pug");
-  };
+  try {
+    const post = await Post.findByPk(postId,{
+      include:[{model: File}]
+    });
+
+    if(!post){
+      throw new Error("No se encontro el post solicitado");      
+    }
+    res.render("post/postDetail.pug",{post});
+  } catch (error) {
+    console.error("Error al cargar el album: " + error);    
+    res.render("post/postDetail.pug", {
+      error: error.message || "Error al intentar cargar el album",
+    });
+  }
+};
   
 /* 
 export const imageDetail = (req, res) => {

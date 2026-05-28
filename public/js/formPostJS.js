@@ -13,7 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnCancel) {
     btnCancel.addEventListener("click", () => {
-      window.location.href = "/dashboard/posts";
+      const postIdInput = document.getElementById("postIdInput");
+      if(postIdInput && postIdInput.value){
+        window.showGlobalModal();
+        //window.location.href = `/post/postDetail/${postIdInput.value}`;
+      }else{
+        window.location.href = "/dashboard/posts";
+      }
     });
   }
 

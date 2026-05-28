@@ -1,3 +1,5 @@
+include mixin/feedbackModalGlobal.pug
+
 doctype html
 html(lang="es")
   head
@@ -53,3 +55,6 @@ html(lang="es")
     footer
       p © 2026 FOTAZA 2 - Todos los derechos reservados
       p Victor Jose David Malovini ULP - PW2
+
+    //- MODAL GLOBAL (info o vacio, error, success)
+    +feedbackModalGlobal('info', '', '', 'Aceptar')

@@ -1,0 +1,61 @@
+extends ../layout.pug
+include ../mixin/feedbackModal.pug
+
+block metadata
+  link(rel="stylesheet", href="/css/postDetailStyle.css")
+
+block content
+  if error
+    +feedbackModal(
+      "error",
+      "¡Error al cargar el Album!",
+      error,
+      "Aceptar"
+    )
+
+  if post
+    .post-detail-page
+      .post-header
+        .post-header-info
+          h1.post-title= post.title
+          if post.description
+            p.post-description= post.description
+          .post-meta
+            //-span.meta-item
+              strong ID:
+              |  #{post.id}
+            span.meta-item
+              strong Etiquetas:
+              |  #{Array.isArray(post.selectedTags) ? post.selectedTags.join(', ') : post.selectedTags || "Sin etiquetas"}
+            span.meta-item
+              strong Comentarios:
+              |  #{post.openComments ? "Abiertos" : "Cerrados"}
+        .post-actions
+          a.action-btn.secondary(href=`/post/formPost?postId=${post.id}`) Editar
+          a.action-btn.danger(href=`/post/delete/${post.id}`) Borrar
+          a.action-btn.primary(href=`/post/uploadFile?titlePost=${encodeURIComponent(post.title)}&idPost=${post.id}`) Agregar imagen
+
+      .post-images
+        h2.section-title Imágenes del álbum
+        if post.Files && post.Files.length > 0
+          .files-list
+            each file in post.Files
+              article.file-card
+                a.file-preview(href=file.path target="_blank" rel="noopener noreferrer")
+                  img(src=file.path alt=file.title || "Imagen del post" loading="lazy")
+                .file-content
+                  .file-title
+                    h3= file.title || 'Sin título'
+                    a.file-open(href=file.path target="_blank" rel="noopener noreferrer") Abrir imagen
+                  if file.description
+                    p.file-description= file.description
+                  .file-meta
+                    span.meta-badge Tipo: #{file.mimetype || 'Desconocido'}
+                    span.meta-badge ID: #{file.id}
+                  .file-actions
+                    form(action=`/file/delete/${file.id}` method="POST")
+                      button.action-btn.secondary(type="submit") Borrar imagen
+        else
+          p.empty-text No hay imágenes cargadas en este álbum.
+  else
+    .empty-text No se encontró el post solicitado.

@@ -29,8 +29,10 @@ block content
 
   section.createPost_section
     .formPost_container
-      h2 CREANDO ALBUM DE FOTAZAS 
-      form(action="/post/formPost" method="POST") 
+      h2= (id? "EDITANDO ALBUM DE FOTAZAS" : "CREANDO ALBUM DE FOTAZAS") 
+      form(action=(id? "/post/updateFormPost" : "/post/formPost") method="POST") 
+        if id
+          input#postIdInput(type="hidden", name="postId", value=id)
         #form_post
           #title_post
             label(for="title") Titulo:
@@ -52,4 +54,4 @@ block content
             
           #buttons_container
             button#cancel_btn.submit_post_btn(type="button") CANCELAR
-            button#create_btn.submit_post_btn(type="submit") CREAR ALBUM
+            button#create_btn.submit_post_btn(type="submit")= (id? "GUARDAR" : "CREAR ALBUM")

@@ -1,10 +1,12 @@
 import Post from "../models/Post.js";
 import File from "../models/File.js";
 import { LIST_TAGS, TAGS } from "../utils/constants.js";
-//ENVIA EL FORMULARIO PARA CREAR ALBUM
-export const formPost = async (req, res) => {
+
+//MOSTRAR EL FORMULARIO DE POST PARA CREAR/EDITAR (LISTO)
+export const showFormPost = async (req, res) => {
   const postId = req.query?.postId;
   let post;
+
   if(postId){
     try {
       const response = await Post.findByPk(postId);
@@ -18,16 +20,42 @@ export const formPost = async (req, res) => {
       return res.render("post/postDetail.pug", {error: error.message});
     }
   }
-
-  res.render("post/formPost.pug", {listTags:LIST_TAGS, ...post});
-};
-
-//GUARDA EL ALBUM EN LA BD
-export const processFormPost = async (req, res) => {
-  const userId = req.user.id;
-  let { title, description, selectedTags, openComments } = req.body;
   
+  res.render("post/formPost.pug",{listTags: LIST_TAGS, ...post});
+}
+
+//CREO EL ALBUM EN LA BD (listo)
+export const createPost = async (req, res) => {
+  const userId = req.user.id;
+
+  const { titlePost, description, selectedTags, openComments } = req.body;
+
   try {
+    const [post, created] = await Post.findOrCreate({
+      where: {
+        idUser: userId,
+        title: titlePost,
+      },
+      defaults: {
+        idUser: userId,
+        title: titlePost,
+        description,
+        selectedTags,
+        openComments
+      }
+    });
+
+    if (!created) {
+      return res.status(409).json({success: false, error: "Ya tienes un Album con ese nombre"});
+    }
+
+    res.json({success:true, postId:post.id});
+  } catch (error) {
+    console.error("❌ Error al intentar crear post en BD:", error);
+
+    res.status(500).json({ success:false, error:"Ocurrio un error interno al intentar crear el Post" });
+  }
+/*   try {
     if (!selectedTags){
       throw new Error("Debe seleccionar al menos una etiqueta (TAG).");    
     }else if(!Array.isArray(selectedTags)){
@@ -72,44 +100,106 @@ export const processFormPost = async (req, res) => {
       listTags: LIST_TAGS,
       ...formValues
     });
+    }; */
+  }
+
+//LEO EL ALBUM EN LA BD (listo)
+export const showPost = async (req, res) => {
+  //console.log(JSON.stringify(req.params, null, 2));
+  const postId = req.params.postId;
+  
+  try {
+    const post = await Post.findByPk(postId,{
+      include:[{model: File}]
+    });
+
+    if(!post){
+      res.status(404).render("post/postDetail.pug",{error: "No se encontro el album solicitado"});
+    }
+    res.render("post/postDetail.pug",{post});
+  } catch (error) {
+    console.error("Error al cargar el album: " + error);    
+    res.render("post/postDetail.pug", {
+      error: error.message || "Error al intentar cargar el album",
+    });
   }
 };
 
-//MODIFICAR EL ALBUM EN LA BD
-export const updateFormPost = async () => {
-  let { postId, title, description, selectedTags, openComments } = req.body;
+//MODIFICAR EL ALBUM EN LA BD (listo)
+export const updatePost = async (req, res) => {
+  let { titlePost, description, selectedTags, openComments } = req.body;
+  const postId = req.params.postId;
 
   try {
     if (!selectedTags){
-      throw new Error("Debe seleccionar al menos una etiqueta (TAG).");    
+      return res.status(400).json({success: false, error:"Debe seleccionar al menos una etiqueta (TAG)."});    
     }else if(!Array.isArray(selectedTags)){
       selectedTags = [selectedTags];
     }
 
-    const rowsUpdated = await Post.update({
-      title,
+    const [rowsUpdated] = await Post.update({
+      title: titlePost,
       description,
       selectedTags,
       openComments
     },{
-      where: {postId}
+      where: {id: postId}
     });
 
-    if(rowsUpdated != 1){
-      throw new Error("No se pudo actualiza el Album");      
-    }else{
-      
+    if(rowsUpdated === 0){
+      return res.status(404).json({success:false, error:"No se encontro el album a actualizar"});   
     }
 
+    res.json({success:true, postId});
+
   } catch (error) {
-    
+    console.error("❌ Error al intentar actualizar el post en la BD:", error);
+    res.status(500).json({success:false, error:"Ocurrio un error al intentar actualizar el Album (post)"});
   }
 }
 
-//ENVIA EL FORMULARIO PARA CARGAR 1 IMAGEN
-export const formUploadFile = (req, res) => {
-  const postValues = req.query;
-  res.render("post/uploadFile.pug", { ...postValues, listTags:LIST_TAGS });
+//DELETE EL ALBUM EN LA BD (listo)
+export const deletePost = async (req, res) => {
+  const postId = req.params.postId;
+console.log("❌ postId");
+  try {
+    const deleteRow = await Post.destroy({where:{id: postId}});
+
+    if(deleteRow === 0){
+      return res.status(404).json({success:false, error:"No se encontro el Archivo a borrar"});
+    }
+
+    res.json({success: true, message: "Registro borrado correctamente"});
+  } catch (error) {
+    console.error("❌ Error al intentar eliminar el post en la BD:", error);
+    res.status(500).json({success:false, error:"Ocurrio un error al intentar borrar el Album (post)"});
+  }
+}
+
+//MUESTRA EL FORMULARIO PARA CARGAR/MODIFICAR 1 IMAGEN
+export const showFormFile = async (req, res) => {
+  const postId = req.params.postId;
+  const titlePost = req.query?.titlePost;
+  const fileId = req.query?.fileId;
+  let file;
+
+  if(fileId){
+    try {
+      const response = await File.findByPk(fileId);
+
+      if(!response){
+        return res.status(404).json({success: false, error:"No se encontro el Archivo"})
+      }
+
+      file = response.toJSON();
+
+    } catch (error) {
+      console.error("Error al recuperar el Archivo en la BD", error);
+      return res.status(500).json({success: false, error:"Ocurrio un error al intentar recuperar los datos del archivo"});
+    }
+  }
+
+  res.render("post/formUploadFile.pug", { titlePost, listTags:LIST_TAGS, ...file });
 };
   
 //PROCESA EL FORMULARIO PARA SUBIR EL ARCHIVO
@@ -152,26 +242,6 @@ export const processFormUploadFile = async (req, res) => {
   }
 };
 
-export const showPostDetail = async (req, res) => {
-  //console.log(JSON.stringify(req.params, null, 2));
-  const postId = req.params.postId;
-  
-  try {
-    const post = await Post.findByPk(postId,{
-      include:[{model: File}]
-    });
-
-    if(!post){
-      throw new Error("No se encontro el post solicitado");      
-    }
-    res.render("post/postDetail.pug",{post});
-  } catch (error) {
-    console.error("Error al cargar el album: " + error);    
-    res.render("post/postDetail.pug", {
-      error: error.message || "Error al intentar cargar el album",
-    });
-  }
-};
   
 /* 
 export const imageDetail = (req, res) => {

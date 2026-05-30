@@ -8,13 +8,13 @@ block content
     .header-actions
       h2 Mis Posts
       a.action-btn.secondary(href="/dashboard") Volver al Dashboard
-      a.action-btn.primary(href="/post/formPost") + Nuevo Post
+      a.action-btn.primary(href="/post/showFormPost") + Nuevo Post
 
     //- Contenedor donde irán las tarjetas de los posts
     #cards-container.posts-grid
       if posts && posts.length > 0
         each post in posts
-          a.cardPost-container(href=`/post/postDetail/${post.id}`)
+          a.cardPost-container(href=`/post/${post.id}`)
             .image-container
               if post.Files && post.Files.length > 0
                 img(src=post.Files[0].path alt=post.title)

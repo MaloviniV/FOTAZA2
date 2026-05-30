@@ -1,17 +1,20 @@
 import { Router } from "express";
-import {formPost, processFormPost, updateFormPost, formUploadFile, processFormUploadFile, showPostDetail} from "../controllers/postController.js";
+import {showFormPost, createPost, showPost, updatePost, deletePost,showFormFile} from "../controllers/postController.js";
 import { uploadMiddleware } from "../middlewares/uploadMiddleware.js";
 
 const router = Router();
 
-router.get("/formPost", formPost);
-router.post("/formPost", processFormPost);
-router.post("/updateFormPost", updateFormPost);
+router.get("/showFormPost", showFormPost);  //LISTO
 
-router.get("/uploadFile", formUploadFile)
-router.post("/formUploadFile", uploadMiddleware.single("file"), processFormUploadFile)
+router.post("/", createPost); //listo
+router.get("/:postId", showPost); //listo
+router.put("/:postId", updatePost); //LISTO
+router.delete("/:postId", deletePost);  //listo
 
-router.get("/postDetail/:postId", showPostDetail);
+router.get("/:postId/showFormFile", showFormFile);
+//router.get("/uploadFile", formUploadFile)
+//router.post("/formUploadFile", uploadMiddleware.single("file"), processFormUploadFile)
+
 
 
 //router.post("/imageDetail", imageDetail);

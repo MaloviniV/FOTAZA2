@@ -3,6 +3,7 @@ include ../mixin/feedbackModal.pug
 
 block metadata
   link(rel="stylesheet", href="/css/postDetailStyle.css")
+  script(src="/js/postDetailJS.js" type="module" defer)
 
 block content
   if error
@@ -10,7 +11,8 @@ block content
       "error",
       "¡Error al cargar el Album!",
       error,
-      "Aceptar"
+      "Ver Posts",
+      "/dashboard/posts"
     )
 
   if post
@@ -31,9 +33,9 @@ block content
               strong Comentarios:
               |  #{post.openComments ? "Abiertos" : "Cerrados"}
         .post-actions
-          a.action-btn.secondary(href=`/post/formPost?postId=${post.id}`) Editar
-          a.action-btn.danger(href=`/post/delete/${post.id}`) Borrar
-          a.action-btn.primary(href=`/post/uploadFile?titlePost=${encodeURIComponent(post.title)}&idPost=${post.id}`) Agregar imagen
+          a.action-btn.secondary(href=`/post/showFormPost?postId=${post.id}`) Editar
+          button.action-btn.delete#deletePost-btn(type="button" data-idPost=post.id) Borrar
+          a.action-btn.primary(href=`/post/${post.id}/showFormFile?titlePost=${encodeURIComponent(post.title)}`) Agregar imagen
 
       .post-images
         h2.section-title Imágenes del álbum

@@ -53,8 +53,21 @@ import { seedTestData } from "./seeders/testSeeder.js";
 (async () => {
   try {
     await connectDatabase();
-    //FORZADO DE INICIO DE SESION CON USUARIO EN BD
-    const testUser = await User.findOne({ where: { email: "mail@mail.com" } });
+
+    //FORZADO DE INICIO DE SESION CON USUARIO EN BD Y CREACION SI NO EXISTE
+    const [testUser, created] = await User.findOrCreate({
+      where: { email: "mail@mail.com" },
+      defaults: {
+        firstName: "Vic",
+        lastName: "Malo",
+        nickname: "@testVic",
+        dni: "11111111",
+        birthdate: "1988-02-20",
+        password: "1111",
+        role: "usuario",
+      },
+    });
+
     if (testUser) {
       const userData = testUser.toJSON();
       global.currentUser = userData;

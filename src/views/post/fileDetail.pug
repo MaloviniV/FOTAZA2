@@ -1,0 +1,78 @@
+extends ../layout.pug
+include ../mixin/feedbackModal.pug
+
+block metadata
+  link(rel="stylesheet", href="/css/fileDetailStyle.css")
+  script(src="/js/fileDetailJS.js" type="module" defer)
+
+block content
+  if error
+    +feedbackModal(
+      "error",
+      "¡Error al cargar el Archivo!",
+      error,
+      "Volver",
+      `/post/${postId}`
+    )
+
+  if file
+    .file-detail-page
+      .file-header
+        .file-header-info
+          h1.file-title= file.title || 'Sin título'
+          if file.description
+            p.file-description= file.description
+          .file-meta
+            span.meta-item
+              strong Etiquetas:
+              |  #{Array.isArray(file.selectedTags) ? file.selectedTags.join(', ') : file.selectedTags || "Sin etiquetas"}
+            span.meta-item
+              strong Tipo:
+              |  #{file.mimetype || 'Desconocido'}
+            if file.textCopyright
+              span.meta-item
+                strong Copyright:
+                |  #{file.textCopyright}
+        .file-actions-wrapper
+          a.action-btn.secondary.btn-back(href=`/post/${file.idPost}`) &larr; Volver al Álbum
+          .file-actions
+            a.action-btn.secondary(href=`/post/${file.idPost}/file/?fileId=${file.id}`) Editar
+            button#btn-delete.action-btn.delete(data-post-id=file.idPost data-file-id=file.id) Borrar
+
+      .file-media-container
+        if file.mimetype && file.mimetype.startsWith('video/')
+          video.media-preview(controls)
+            source(src=file.path type=file.mimetype)
+            | Tu navegador no soporta el elemento de video.
+        else
+          img.media-preview(src=file.path alt=file.title || "Archivo multimedia")
+
+      //- SECCIÓN DE COMENTARIOS
+      .post-comments
+        h2.section-title Comentarios
+        
+        if file.openComments
+          form.comment-form(action=`/file/${file.id}/comment` method="POST")
+            textarea.comment-input(name="commentText" rows="3" placeholder="Escribe tu comentario aquí..." required)
+            .comment-form-actions
+              button.action-btn.primary(type="submit") Enviar comentario
+        else
+          .comments-closed-notice
+            p Los comentarios están cerrados para este archivo.
+
+        //- Lista de comentarios
+        .comments-list
+          if file.Comments && file.Comments.length > 0
+            each comment in file.Comments
+              .comment-card
+                .comment-avatar= (comment.User && comment.User.name) ? comment.User.name.charAt(0).toUpperCase() : 'U'
+                .comment-content
+                  .comment-header
+                    span.comment-author= (comment.User && comment.User.name) ? comment.User.name : 'Usuario Anónimo'
+                    span.comment-date= new Date(comment.createdAt).toLocaleDateString()
+                  p.comment-text= comment.text
+          else
+            p.empty-text No hay comentarios aún. ¡Sé el primero en opinar!
+
+  else if !error
+    .empty-text No se encontró el archivo solicitado.

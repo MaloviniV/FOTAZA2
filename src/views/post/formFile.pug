@@ -2,13 +2,13 @@ extend ../layout.pug
 include ../mixin/feedbackModal.pug
 
 block metadata 
-    link(rel="stylesheet", href="/css/uploadFileStyle.css")
+    link(rel="stylesheet", href="/css/formFileStyle.css")
     link(href="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.css" rel="stylesheet")
     script(src="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.min.js" defer)
-    script(src="/js/uploadFileJS.js" type="module" defer)
+    script(src="/js/formFileJS.js" type="module" defer)
 
 block content
-  if success
+  //-if success
     +feedbackModal(
       "success",
       "¡Subida Exitosa!",
@@ -18,27 +18,35 @@ block content
       "Ver mis Posts",
       "/dashboard/posts"
     )
-  else if error
+  if error
     +feedbackModal(
       "error",
-      "¡Error al guardar el archivo!",
+      "¡Error de archivo!",
       error,
       "Aceptar"
     )
 
   section
     #viem_uploadFile 
-      h2 SUBIENDO UN ARCHIVO A FOTAZA
-      form#form_uploadFile(action="/post/formUploadFile" method="POST" enctype="multipart/form-data")
+      h2= (id ? "EDITANDO ARCHIVO" : "SUBIENDO UN ARCHIVO A FOTAZA")
+      form#form_uploadFile
         #upload_file
-          input(type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg, video/mp4, video/webm" placeholder="¡¡Subi tu archivo a FOTAZA!!" required)
-          img.image_preview.oculto#image_preview(alt="Vista previa")
-          video.video_preview.oculto#video_preview(controls)
+          input(type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg, video/mp4, video/webm" placeholder="¡¡Subi tu archivo a FOTAZA!!" required=!id)
+          
+          if path && mimetype && mimetype.startsWith('video/')
+            img.image_preview.oculto#image_preview(alt="Vista previa")
+            video.video_preview#video_preview(controls src=path)
+          else if path
+            img.image_preview#image_preview(alt="Vista previa" src=path)
+            video.video_preview.oculto#video_preview(controls)
+          else
+            img.image_preview.oculto#image_preview(alt="Vista previa")
+            video.video_preview.oculto#video_preview(controls)
         #metadata_file 
           #title_Post
             label(for="titlePost") ALBUM:
-            input(type="text" name="titlePost" value=titlePost readonly)
-            input(type="hidden" name="idPost" value=idPost)
+            input(type="text" name="titlePost" value=(titlePost || (Post && Post.title)) readonly)
+            input#idPost_input(type="hidden" name="idPost" value=idPost)
           #title_image 
             label(for="title") Titulo:
             input(type="text" name="title" placeholder="Titulo del archivo..." required value=title)
@@ -63,5 +71,5 @@ block content
               label(for="textCopyright") Texto del Copyright: 
               input(type="text" name="textCopyright" placeholder="Texto del copyright..." value=textCopyright)
         #uploadFile_btn
-          button#upload_btn(type="submit") SUBIR
+          button#upload_btn(type="submit") GUARDAR
           button#cancel_btn(type="button") CANCELAR

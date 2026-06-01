@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
           window.location.href = `/dashboard/posts`;
         } catch (error) {
-          console.error("Error al borrar el Album", error);
+          console.error("❌ Error al borrar el Album", error);
           setTimeout(() => {  //lo demoro para no superponer los modales y tener un error
             window.showGlobalModal("error", "¡Error!", error.message, "Aceptar", null);            
           }, 300);

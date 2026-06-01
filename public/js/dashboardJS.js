@@ -18,40 +18,42 @@ document.addEventListener("DOMContentLoaded", () => {
         divButtons.innerHTML = "";
         if (tabId === "posts-btn") {
           const response = await fetch("/post/posts");
-    
+
           const postsList = await response.json();
 
           const button = document.createElement("button");
           button.textContent = "Nuevo post";
-          button.setAttribute("id","newPost-btn");
+          button.setAttribute("id", "newPost-btn");
           divButtons.appendChild(button);
 
-          postsList.forEach(post => {
+          postsList.forEach((post) => {
             const cardPost = document.createElement("div");
             cardPost.classList.add("cardPost-container");
             cardPost.title = post.title;
 
-              const containerImage = document.createElement("div");
-              containerImage.classList.add("image-container");
+            const containerImage = document.createElement("div");
+            containerImage.classList.add("image-container");
 
-                const postImage = document.createElement("img");
-                postImage.src = post.path;
-                postImage.alt = post.title;
-                containerImage.appendChild(postImage);
-            
-              const metadata = document.createElement("div");
-              metadata.classList.add("metadata-container");
+            const postImage = document.createElement("img");
+            // Buscamos el path de la primera imagen del álbum.
+            // Si no hay imágenes, asignamos una imagen por defecto (o string vacío).
+            postImage.src =
+              post.Files && post.Files.length > 0 ? post.Files[0].path : "";
+            postImage.alt = post.title;
+            containerImage.appendChild(postImage);
 
-                const title = document.createElement("h3");
-                title.textContent = post.title;
-                metadata.appendChild(title);
+            const metadata = document.createElement("div");
+            metadata.classList.add("metadata-container");
 
-              cardPost.append(containerImage, metadata);
+            const title = document.createElement("h3");
+            title.textContent = post.title;
+            metadata.appendChild(title);
+
+            cardPost.append(containerImage, metadata);
             fragmentCards.append(cardPost);
           });
 
           divCards.appendChild(fragmentCards);
-
         } else if (tabId === "colections-btn") {
           wallNavegation.innerHTML = `
             <div class="collections-list">
@@ -85,8 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
         }
-
-        
       }, 300);
     } catch (error) {
       console.error("Error al cargar el contenido de la pestaña:", error);

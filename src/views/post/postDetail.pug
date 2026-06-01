@@ -9,7 +9,7 @@ block content
   if error
     +feedbackModal(
       "error",
-      "¡Error al cargar el Album!",
+      "¡Error al mostrar el Archivo!",
       error,
       "Ver Posts",
       "/dashboard/posts"
@@ -32,32 +32,69 @@ block content
             span.meta-item
               strong Comentarios:
               |  #{post.openComments ? "Abiertos" : "Cerrados"}
-        .post-actions
-          a.action-btn.secondary(href=`/post/showFormPost?postId=${post.id}`) Editar
-          button.action-btn.delete#deletePost-btn(type="button" data-idPost=post.id) Borrar
-          a.action-btn.primary(href=`/post/${post.id}/showFormFile?titlePost=${encodeURIComponent(post.title)}`) Agregar imagen
+        .post-actions-wrapper
+          a.action-btn.secondary.btn-back(href="/dashboard/posts") &larr; Volver a los posts
+          .post-actions
+            a.action-btn.secondary(href=`/post/showFormPost?postId=${post.id}`) Editar
+            button.action-btn.delete#deletePost-btn(type="button" data-idPost=post.id) Borrar
+            a.action-btn.primary(href=`/post/${post.id}/file/?titlePost=${encodeURIComponent(post.title)}`) Agregar imagen
+
 
       .post-images
         h2.section-title Imágenes del álbum
         if post.Files && post.Files.length > 0
           .files-list
             each file in post.Files
-              article.file-card
-                a.file-preview(href=file.path target="_blank" rel="noopener noreferrer")
+              article.file-card(style="position: relative;")
+                //- ENLACE AL DETALLE DEL ARCHIVO
+                a.file-link(href=`/post/${post.id}/file/${file.id}` style="position: absolute; inset: 0; z-index: 1;") 
+                
+                .file-preview
                   img(src=file.path alt=file.title || "Imagen del post" loading="lazy")
                 .file-content
                   .file-title
                     h3= file.title || 'Sin título'
-                    a.file-open(href=file.path target="_blank" rel="noopener noreferrer") Abrir imagen
                   if file.description
                     p.file-description= file.description
                   .file-meta
-                    span.meta-badge Tipo: #{file.mimetype || 'Desconocido'}
-                    span.meta-badge ID: #{file.id}
-                  .file-actions
-                    form(action=`/file/delete/${file.id}` method="POST")
-                      button.action-btn.secondary(type="submit") Borrar imagen
+                    span.meta-badge Etiquetas: #{file.selectedTags || 'Sin etiquetas'}
+                  
+                  //- MOSTRAR SI ES EL CREADOR
+                  if user && user.id === post.idUser
+                    .file-actions(style="position: relative; z-index: 2;")
+                      form(action=`/file/delete/${file.id}` method="POST")
+                        button.action-btn.secondary(type="submit") Borrar imagen
         else
           p.empty-text No hay imágenes cargadas en este álbum.
+
+      //- SECCIÓN DE COMENTARIOS
+      .post-comments
+        h2.section-title Comentarios
+        
+        //- Formulario para comentar (solo si están abiertos)
+        if post.openComments
+          form.comment-form(action=`/post/${post.id}/comment` method="POST")
+            textarea.comment-input(name="commentText" rows="3" placeholder="Escribe tu comentario aquí..." required)
+            .comment-form-actions
+              button.action-btn.primary(type="submit") Enviar comentario
+        else
+          .comments-closed-notice
+            p Los comentarios están cerrados para este álbum.
+
+        //- Lista de comentarios
+        .comments-list
+          if post.Comments && post.Comments.length > 0
+            each comment in post.Comments
+              .comment-card
+                //- Avatar generado con la primera letra del nombre del usuario
+                .comment-avatar= (comment.User && comment.User.name) ? comment.User.name.charAt(0).toUpperCase() : 'U'
+                .comment-content
+                  .comment-header
+                    span.comment-author= (comment.User && comment.User.name) ? comment.User.name : 'Usuario Anónimo'
+                    span.comment-date= new Date(comment.createdAt).toLocaleDateString()
+                  p.comment-text= comment.text
+          else
+            p.empty-text No hay comentarios aún. ¡Sé el primero en opinar!
+
   else
     .empty-text No se encontró el post solicitado.

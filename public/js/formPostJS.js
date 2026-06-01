@@ -10,28 +10,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   //EVENTO SUBMIT
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    submitBtn.disabled = true;
+    
+    //AGREGAR VALIDACIONES DE LOS CAMPOS
 
-    const datos = {
-      titlePost: form.title?.value,
-      description: form.description?.value,
-      selectedTags: Array.from(form.selectedTags?.selectedOptions || []).map(opt => opt.value),
-      openComments: form.openComments?.checked
-    };
-//AGREGAR VALIDACIONES DE LOS CAMPOS
+    submitBtn.disabled = true;
     
     try {
+      const datos = {
+      titlePost: form.title?.value,
+        description: form.description?.value,
+        selectedTags: Array.from(form.selectedTags?.selectedOptions || []).map(opt => opt.value),
+        openComments: form.openComments?.checked
+      };
+      
       if (postId) {          //MODIFICAR ALBUM (PUT)
         const response = await fetch(`/post/${postId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(datos)
         });
-
+        
         const result = await response.json();
-
+        
         if(!response.ok) throw new Error(result.error || "No se pudo modificar el Album");
-
+        
         window.showGlobalModal("success", "¡Exito!", "¡Modificacion del album exitosa!", "Ir al Album", `/post/${postId}`);
       } else {          //CREAR ALBUM (POST)
         const response = await fetch('/post', {
@@ -44,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if(!response.ok) throw new Error(result.error || "¡No se pudo crear el Album!");
         
-        window.showGlobalModal("success", "¡Exito!", "¡Creación del album exitosa!", "Ir al Album", `/post/${result.postId}`, "Subir Archivo", `/post/${result.postId}/uploadFile?titlePost=${datos.titlePost}`);
+        window.showGlobalModal("success", "¡Exito!", "¡Creación del album exitosa!", "Ir al Album", `/post/${result.postId}`, "Subir Archivo", `/post/${result.postId}/file?titlePost=${datos.titlePost}`);
       }        
     } catch (error) {
       console.error("❌ Error al crear/modifiicar el Album:" + error);

@@ -8,20 +8,27 @@ const LIMIT = 10;
 
 export const showWallPublic = async (req, res) => {
   try {
+    const currentUserId = req.user?.id;
+
+    const postInclude = {
+      model: Post,
+      include: [
+        {
+          model: User,
+          attributes: ["id", "nickname"],
+        },
+      ],
+    };
+
+    // Si hay un usuario logueado, excluimos sus publicaciones
+    if (currentUserId) {
+      postInclude.where = { idUser: { [Op.ne]: currentUserId } };
+    }
+
     const response = await File.findAll({
       order: [],
       limit: LIMIT,
-      include: [
-        {
-          model: Post,
-          include: [
-            {
-              model: User,
-              attributes: ["id", "nickname"],
-            },
-          ],
-        },
-      ],
+      include: [postInclude],
     });
 
     if (response.length === 0)
@@ -36,12 +43,10 @@ export const showWallPublic = async (req, res) => {
     });
   } catch (error) {
     console.error("Error en la base de datos:", error.message);
-    return res
-      .status(500)
-      .render("home/wallPublic.pug", {
-        success: false,
-        error: "Error al intentar recuperar los datos",
-      });
+    return res.status(500).render("home/wallPublic.pug", {
+      success: false,
+      error: "Error al intentar recuperar los datos",
+    });
   }
 };
 /* 

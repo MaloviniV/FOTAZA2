@@ -13,21 +13,25 @@ export const processLogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne( {where: {email} });
+    const user = await User.findOne({ where: { email } });
 
     if (user && user.password === password) {
-      global.currentUser = {
-        ...user.toJSON()
-      }
-      res.redirect(`/dashboard`);
+      req.session.user = {
+        ...user.toJSON(),
+      };
+  
+      req.session.save((err) => {
+        if (err) throw err;
+        res.redirect(`/dashboard`);
+      });
     } else {
-        throw new Error("Email o contraseña incorrectos");
+      throw new Error("Email o contraseña incorrectos");
     }
   } catch (error) {
     console.error("Error al procesar el login:", error);
     res.render("auth/formLogin.pug", {
-      error: (error.message || "Ocurrió un error al intentar iniciar sesión."),
-      email
+      error: error.message || "Ocurrió un error al intentar iniciar sesión.",
+      email,
     });
   }
 };
@@ -37,7 +41,8 @@ export const register = (req, res) => {
 };
 
 export const prossesRegister = async (req, res) => {
-  const { firstName, lastName, dni, birthdate, nickname, email, password } = req.body;
+  const { firstName, lastName, dni, birthdate, nickname, email, password } =
+    req.body;
 
   try {
     //*****ENCRIPTAR CONTRASEÑA*****
@@ -48,17 +53,21 @@ export const prossesRegister = async (req, res) => {
       dni,
       birthdate,
       email,
-      password
+      password,
     });
 
-    res.redirect(`/auth/login?email=${newUser.email}&name=${newUser.firstName}&register=true`);
+    res.redirect(
+      `/auth/login?email=${newUser.email}&name=${newUser.firstName}&register=true`,
+    );
   } catch (error) {
     console.error("Error al registrarse en BD:", error);
-    res.render("auth/formRegister.pug",{error: "Usted ya esta registrado"});
+    res.render("auth/formRegister.pug", { error: "Usted ya esta registrado" });
   }
 };
 
 export const logout = (req, res) => {
-  global.currentUser = null;
-  res.redirect("/");
+  req.session.destroy((err) => {
+    if (err) console.error("Error al destruir la sesión:", err);
+    res.redirect("/");
+  });
 };

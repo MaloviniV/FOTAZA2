@@ -1,6 +1,6 @@
 import express from "express";
 import { server } from "./config/config.js";
-import { connectDatabase } from "./config/db.js";
+import { connectDatabase, sequelize } from "./config/db.js";
 import "./models/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -10,6 +10,8 @@ import * as routes from "./routes/indexRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AppError from "./utils/AppError.js";
 import { requireAuth } from "./middlewares/authMidleware.js";
+import session from "express-session";
+import connectSessionSequelize from "connect-session-sequelize";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,10 +28,29 @@ app.use(express.urlencoded({ extended: true })); //Para leer datos de formulario
 app.use(express.json()); //Para leer datos en JSON
 app.use(express.static(path.join(__dirname, "..", "public"))); //Donde buscar archivos estaticos
 
-// HARDCODEAR SESION GLOBAL
+const SequelizeStore = connectSessionSequelize(session.Store);
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
+
+// express-session
+app.use(
+  session({
+    secret: server.sessionSecret,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  }),
+);
+
+// Middleware global para inyectar la sesión en req.user
 app.use((req, res, next) => {
-  req.user = global.currentUser || null;
-  res.locals.user = global.currentUser || null;
+  req.user = req.session.user || null;
+  res.locals.currentUser = req.session.user || null;
   next();
 });
 
@@ -54,6 +75,9 @@ import { seedTestData } from "./seeders/testSeeder.js";
   try {
     await connectDatabase();
 
+    // Sincronizar la tabla de sesiones en la BD
+    await sessionStore.sync();
+
     //FORZADO DE INICIO DE SESION CON USUARIO EN BD Y CREACION SI NO EXISTE
     const [testUser, created] = await User.findOrCreate({
       where: { email: "mail@mail.com" },
@@ -69,9 +93,6 @@ import { seedTestData } from "./seeders/testSeeder.js";
     });
 
     if (testUser) {
-      const userData = testUser.toJSON();
-      global.currentUser = userData;
-
       // Ejecutar los datos de prueba
       await seedTestData(testUser);
     }

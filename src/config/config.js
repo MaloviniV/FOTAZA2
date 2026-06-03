@@ -6,6 +6,7 @@ dotenv.config();
 export const server = {
   port: process.env.APP_PORT || 3000,
   debug: process.env.APP_DEBUG === "true",
+  sessionSecret: process.env.SESSION_SECRET || "secreto_por_defecto_123",
 };
 
 export const database = {

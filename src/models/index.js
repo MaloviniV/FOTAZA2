@@ -3,6 +3,7 @@ import Follow from "./Follow.js";
 import Post from "./Post.js";
 import File from "./File.js";
 import Rating from "./Rating.js";
+import Comment from "./Comment.js";
 
 //USER->FOLLOW(m..n)
 User.belongsToMany(User, {
@@ -64,20 +65,42 @@ File.belongsTo(Post, {
 //FILE->RATING (1..n)
 File.hasMany(Rating, {
   foreignKey: "idFile",
-  sourceKey: "id"
+  sourceKey: "id",
 });
 
-Rating.belongsTo(File,{
+Rating.belongsTo(File, {
   foreignKey: "idFile",
-  targetKey: "id"
+  targetKey: "id",
 });
 //USER->RATING (1..n)
 User.hasMany(Rating, {
   foreignKey: "idUser",
-  sourceKey: "id"
+  sourceKey: "id",
 });
 
-Rating.belongsTo(User,{
+Rating.belongsTo(User, {
   foreignKey: "idUser",
-  targetKey: "id"
+  targetKey: "id",
+});
+
+//USER->COMMENT (1..n)
+User.hasMany(Comment, {
+  foreignKey: "idUser",
+  sourceKey: "id",
+});
+
+Comment.belongsTo(User, {
+  foreignKey: "idUser",
+  targetKey: "id",
+});
+
+//FILE->COMMENT (1..n)
+File.hasMany(Comment, {
+  foreignKey: "idFile",
+  sourceKey: "id",
+});
+
+Comment.belongsTo(File, {
+  foreignKey: "idFile",
+  targetKey: "id",
 });

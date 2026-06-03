@@ -1,4 +1,4 @@
-import {Model, DataTypes} from "sequelize";
+import { Model, DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { STATUS_FOLLOW, LIST_STATUS_FOLLOW } from "../utils/constants.js";
 
@@ -8,42 +8,41 @@ Follow.init(
   {
     followerId: {
       type: DataTypes.INTEGER,
-      allowNull: false,      
+      allowNull: false,
       primaryKey: true,
       references: {
         model: "users",
-        key: "id"
-      }
+        key: "id",
+      },
     },
     followingId: {
       type: DataTypes.INTEGER,
-      allowNull: false,      
+      allowNull: false,
       primaryKey: true,
       references: {
         model: "users",
-        key: "id"
-      }
+        key: "id",
+      },
     },
     status: {
       defaultValue: STATUS_FOLLOW.PENDING,
       type: DataTypes.ENUM(...LIST_STATUS_FOLLOW),
-      allowNull: false
-    }
+      allowNull: false,
+    },
   },
   {
     sequelize,
     modelName: "Follow",
     tableName: "follows",
     timestamps: true,
-    paranoid: true,
     validate: {
       seguirse() {
-        if(this.followerId===this.followingId) {
-          throw new Error("Un usuario no puede seguirse a sí mismo.");          
+        if (this.followerId === this.followingId) {
+          throw new Error("Un usuario no puede seguirse a sí mismo.");
         }
-      }
-    }
-  }
+      },
+    },
+  },
 );
 
 export default Follow;

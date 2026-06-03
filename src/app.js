@@ -59,6 +59,7 @@ app.use("/post", requireAuth, routes.postRoutes);
 app.use("/api", routes.apiRoutes);
 app.use("/auth", routes.authRoutes);
 app.use("/dashboard", requireAuth, routes.dashboardRoutes);
+app.use("/user", requireAuth, routes.userRoutes);
 app.use("/", routes.homeRoutes);
 
 //Manejo de errores

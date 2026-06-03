@@ -116,4 +116,71 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // BORRAR COMENTARIO
+  const deleteCommentBtns = document.querySelectorAll(".btn-delete-comment");
+  if (deleteCommentBtns.length > 0) {
+    deleteCommentBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const postId = btn.dataset.postId;
+        const fileId = btn.dataset.fileId;
+        const commentId = btn.dataset.commentId;
+
+        const message = "¿Estás seguro de que deseas borrar este comentario?";
+        const deleteComment = async () => {
+          btn.disabled = true;
+          try {
+            const response = await fetch(
+              `/post/${postId}/file/${fileId}/comment/${commentId}`,
+              {
+                method: "DELETE",
+              },
+            );
+
+            const result = await response.json();
+            if (!response.ok)
+              throw new Error(
+                result.error || "No se pudo eliminar el comentario",
+              );
+
+            const commentCard = btn.closest(".comment-card");
+            if (commentCard) commentCard.remove();
+
+            const commentsList = document.querySelector(".comments-list");
+            if (
+              commentsList &&
+              commentsList.querySelectorAll(".comment-card").length === 0
+            ) {
+              commentsList.innerHTML =
+                '<p class="empty-text">No hay comentarios aún. ¡Sé el primero en opinar!</p>';
+            }
+          } catch (error) {
+            console.error("❌ Error al borrar el comentario:", error);
+            btn.disabled = false;
+            setTimeout(
+              () =>
+                window.showGlobalModal(
+                  "error",
+                  "¡Error!",
+                  error.message,
+                  "Aceptar",
+                  null,
+                ),
+              300,
+            );
+          }
+        };
+
+        window.showGlobalModal(
+          "",
+          "Borrar Comentario",
+          message,
+          "Aceptar",
+          deleteComment,
+          "Cancelar",
+          "",
+        );
+      });
+    });
+  }
 });

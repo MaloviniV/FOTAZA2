@@ -3,5 +3,6 @@ import authRoutes from "./authRoutes.js";
 import apiRoutes from "./apiRoutes.js";
 import dashboardRoutes from "./dashboardRoutes.js";
 import postRoutes from "./postRoutes.js"
+import userRoutes from "./userRoutes.js"
 
-export { homeRoutes, dashboardRoutes, postRoutes, authRoutes, apiRoutes};
+export { homeRoutes, dashboardRoutes, postRoutes, authRoutes, apiRoutes, userRoutes};

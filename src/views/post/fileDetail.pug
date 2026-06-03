@@ -44,10 +44,17 @@ block content
             //- SISTEMA DE VALORACIÓN (ESTRELLAS)
             span.meta-item.rating-item(data-file-id=file.id)
               strong Valoración:
-              .stars-container(style="display: inline-flex; gap: 4px; margin-left: 6px; color: #fbbf24; cursor: pointer; font-size: 1.1em;")
-                - const currentUserRating = file.userRating || 0
-                each star in [1, 2, 3, 4, 5]
-                  i.star-icon(class=(currentUserRating >= star ? 'fa-solid fa-star' : 'fa-regular fa-star') data-value=star style="transition: transform 0.2s;")
+              - const isOwner = currentUser && author && currentUser.id === author.id
+              if isOwner
+                .stars-container.disabled(style="display: inline-flex; gap: 4px; margin-left: 6px; color: #cbd5e1; font-size: 1.1em;" title="No puedes valorar tus propias fotos")
+                  - const avgRating = Math.round(file.averageRating || 0)
+                  each star in [1, 2, 3, 4, 5]
+                    i(class=(avgRating >= star ? 'fa-solid fa-star' : 'fa-regular fa-star'))
+              else
+                .stars-container(style="display: inline-flex; gap: 4px; margin-left: 6px; color: #fbbf24; cursor: pointer; font-size: 1.1em;")
+                  - const currentUserRating = file.userRating || 0
+                  each star in [1, 2, 3, 4, 5]
+                    i.star-icon(class=(currentUserRating >= star ? 'fa-solid fa-star' : 'fa-regular fa-star') data-value=star style="transition: transform 0.2s;")
               span.rating-average(style="margin-left: 6px; font-weight: bold;") #{file.averageRating ? file.averageRating : '0'} / 5
               span.rating-count(style="margin-left: 4px; color: #64748b; font-size: 0.9em;") (#{file.totalRatings || 0} votos)
 
@@ -74,7 +81,7 @@ block content
         h2.section-title Comentarios
         
         if file.openComments
-          form.comment-form(action=`/file/${file.id}/comment` method="POST")
+          form.comment-form(action=`/post/${file.idPost}/file/${file.id}/comment` method="POST")
             textarea.comment-input(name="commentText" rows="3" placeholder="Escribe tu comentario aquí..." required)
             .comment-form-actions
               button.action-btn.primary(type="submit") Enviar comentario
@@ -87,11 +94,19 @@ block content
           if file.Comments && file.Comments.length > 0
             each comment in file.Comments
               .comment-card
-                .comment-avatar= (comment.User && comment.User.name) ? comment.User.name.charAt(0).toUpperCase() : 'U'
+                a(href=(comment.User ? `/user/${comment.User.id}` : '#') style="text-decoration: none;")
+                  if comment.User && comment.User.avatarUrl
+                    img.comment-avatar(src=comment.User.avatarUrl alt=`Avatar de ${comment.User.nickname}` style="object-fit: cover;")
+                  else
+                    .comment-avatar= (comment.User && comment.User.firstName) ? comment.User.firstName.charAt(0).toUpperCase() : 'U'
                 .comment-content
                   .comment-header
-                    span.comment-author= (comment.User && comment.User.name) ? comment.User.name : 'Usuario Anónimo'
-                    span.comment-date= new Date(comment.createdAt).toLocaleDateString()
+                    div(style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;")
+                      a.comment-author(href=(comment.User ? `/user/${comment.User.id}` : '#') style="text-decoration: none; color: inherit;")= (comment.User && comment.User.nickname) ? comment.User.nickname : 'Usuario Anónimo'
+                      span.comment-date= new Date(comment.createdAt).toLocaleDateString()
+                    if currentUser && currentUser.id === comment.idUser
+                      button.btn-delete-comment(data-post-id=file.idPost data-file-id=file.id data-comment-id=comment.id title="Borrar comentario" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; transition: background-color 0.2s;")
+                        i.fa-solid.fa-trash
                   p.comment-text= comment.text
           else
             p.empty-text No hay comentarios aún. ¡Sé el primero en opinar!

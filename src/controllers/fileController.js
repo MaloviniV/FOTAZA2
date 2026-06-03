@@ -2,6 +2,7 @@ import File from "../models/File.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 import Rating from "../models/Rating.js";
+import Comment from "../models/Comment.js";
 import { LIST_TAGS } from "../utils/constants.js";
 
 //MUESTRA EL FORMULARIO PARA CARGAR/MODIFICAR 1 ARCHIVO
@@ -33,7 +34,17 @@ export const showFormFile = async (req, res) => {
             },
           ],
         },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ["id", "nickname", "avatarUrl", "firstName"],
+            },
+          ],
+        },
       ],
+      order: [[Comment, "createdAt", "DESC"]],
     });
 
     if (!response) {
@@ -61,6 +72,39 @@ export const showFormFile = async (req, res) => {
   }
 };
 
+// AGREGAR COMENTARIO
+export const addComment = async (req, res) => {
+  const { fileId, postId } = req.params;
+  const { commentText } = req.body;
+
+  if (!req.user) {
+    return res.redirect("/auth/login");
+  }
+
+  try {
+    const file = await File.findByPk(fileId);
+
+    if (!file || !file.openComments) {
+      return res
+        .status(403)
+        .send("No se pueden agregar comentarios a este archivo.");
+    }
+
+    if (commentText && commentText.trim().length > 0) {
+      await Comment.create({
+        idUser: req.user.id,
+        idFile: fileId,
+        text: commentText.trim(),
+      });
+    }
+
+    res.redirect(`/post/${postId}/file/${fileId}`);
+  } catch (error) {
+    console.error("❌ Error al agregar comentario:", error);
+    res.status(500).send("Ocurrió un error al intentar agregar el comentario.");
+  }
+};
+
 //CREO EL FILE EN LA BD (listo)
 export const createFile = async (req, res) => {
   const postId = req.params.postId;
@@ -77,7 +121,6 @@ export const createFile = async (req, res) => {
 
     const { mimetype } = req.file;
 
-    // Normalizamos la ruta física para que sea una URL web válida
     let path = req.file.path.replace(/\\/g, "/");
     if (path.startsWith("public/")) {
       path = path.replace("public/", "/");
@@ -140,7 +183,17 @@ export const showFile = async (req, res) => {
             },
           ],
         },
+        {
+          model: Comment,
+          include: [
+            {
+              model: User,
+              attributes: ["id", "nickname", "avatarUrl", "firstName"],
+            },
+          ],
+        },
       ],
+      order: [[Comment, "createdAt", "DESC"]],
     });
 
     if (!response) {
@@ -190,6 +243,21 @@ export const rateFile = async (req, res) => {
 
   try {
     const userId = req.user.id;
+
+    const file = await File.findByPk(fileId, {
+      include: [{ model: Post, attributes: ["idUser"] }],
+    });
+
+    if (!file)
+      return res
+        .status(404)
+        .json({ success: false, error: "Archivo no encontrado." });
+    if (file.Post && file.Post.idUser === userId) {
+      return res.status(400).json({
+        success: false,
+        error: "No puedes valorar tus propias fotos.",
+      });
+    }
 
     let rating = await Rating.findOne({
       where: { idUser: userId, idFile: fileId },
@@ -311,5 +379,48 @@ export const deleteFile = async (req, res) => {
       success: false,
       error: "Ocurrio un error al intentar borrar el Archivo",
     });
+  }
+};
+
+// BORRAR COMENTARIO
+export const deleteComment = async (req, res) => {
+  const { commentId } = req.params;
+
+  if (!req.user) {
+    return res
+      .status(401)
+      .json({
+        success: false,
+        error: "Debes iniciar sesión para realizar esta acción.",
+      });
+  }
+
+  try {
+    const comment = await Comment.findByPk(commentId);
+
+    if (!comment)
+      return res
+        .status(404)
+        .json({ success: false, error: "El comentario no existe." });
+
+    if (comment.idUser !== req.user.id) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          error: "No tienes permiso para borrar este comentario.",
+        });
+    }
+
+    await comment.destroy();
+    res.json({ success: true, message: "Comentario borrado correctamente." });
+  } catch (error) {
+    console.error("❌ Error al borrar comentario:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Ocurrió un error al intentar borrar el comentario.",
+      });
   }
 };

@@ -3,37 +3,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const gridContainer = document.querySelector(".grid-container");
 
   if (loadMoreBtn && gridContainer) {
-    loadMoreBtn.addEventListener("click", async (e) => {
-      const btn = e.target;
-      const offset = btn.dataset.offset; 
+    let offset = document.querySelectorAll(".card").length;
 
+    loadMoreBtn.addEventListener("click", async () => {
       try {
-        const response = await fetch(`/image/loadImages?offset=${offset}`);
-        const { hasMore, nextOffset, fotos } = await response.json();
-
-        let fragment = document.createDocumentFragment();
-
-        fotos.forEach(foto => {
-          const div = document.createElement("div");
-          div.classList.add("grid-item");
-
-          const img = document.createElement("img");
-          img.src = `/imagenes/${foto}`;
-          img.alt = "imagen";
-          img.loading = "lazy";
-
-          div.appendChild(img);
-          fragment.appendChild(div);
+        const response = await fetch("/api/loadMoreFiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offset }),
         });
 
-        gridContainer.appendChild(fragment);
+        if (!response.ok)
+          throw new Error("Error al intentar recuperar los datos");
 
-        console.log(btn.dataset.offset);
-        btn.dataset.offset = nextOffset;
+        const html = await response.text();
 
-        if (!hasMore) btn.style.display = "none";
+        gridContainer.insertAdjacentHTML("beforeend", html);
+
+        offset = document.querySelectorAll(".card").length;
       } catch (error) {
         console.error("Error al cargar mas imagenes:", error);
+        alert("Ocurrio un error al cargar mas imagenes. Intenta nuevamente");
       }
     });
   }

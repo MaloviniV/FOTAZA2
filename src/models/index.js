@@ -2,6 +2,7 @@ import User from "./User.js";
 import Follow from "./Follow.js";
 import Post from "./Post.js";
 import File from "./File.js";
+import Rating from "./Rating.js";
 
 //USER->FOLLOW(m..n)
 User.belongsToMany(User, {
@@ -37,6 +38,7 @@ Follow.belongsTo(User, {
   foreignKey: "followingId",
   targetKey: "id",
 });
+
 //USER->POST (1..n)
 User.hasMany(Post, {
   foreignKey: "idUser",
@@ -47,7 +49,8 @@ Post.belongsTo(User, {
   foreignKey: "idUser",
   targetKey: "id",
 });
-//POST->IMAGE
+
+//POST->FILE
 Post.hasMany(File, {
   foreignKey: "idPost",
   sourceKey: "id",
@@ -56,4 +59,25 @@ Post.hasMany(File, {
 File.belongsTo(Post, {
   foreignKey: "idPost",
   targetKey: "id",
+});
+
+//FILE->RATING (1..n)
+File.hasMany(Rating, {
+  foreignKey: "idFile",
+  sourceKey: "id"
+});
+
+Rating.belongsTo(File,{
+  foreignKey: "idFile",
+  targetKey: "id"
+});
+//USER->RATING (1..n)
+User.hasMany(Rating, {
+  foreignKey: "idUser",
+  sourceKey: "id"
+});
+
+Rating.belongsTo(User,{
+  foreignKey: "idUser",
+  targetKey: "id"
 });

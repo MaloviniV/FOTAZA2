@@ -1,9 +1,9 @@
 extends ../layout.pug
 include ../mixin/feedbackModal.pug
 
-
 block metadata 
   link(rel="stylesheet", href="/css/wallStyle.css")
+  link(rel="stylesheet", href="/css/_cardStyle.css")
   script(src="/js/wallPublicJS.js" type="module" defer)
 
 block content
@@ -23,8 +23,9 @@ block content
   section#main-wall
     h2 Fotos populares 
     .grid-container 
-      if fotos
-        each foto in fotos
-          .grid-item 
-            img(src=`/imagenes/${foto}` alt="imagen" loading="lazy")
-    button.wall-more-btn(type="button" data-offset=nextOffset) Cargar Más
+      if (files)
+        include ../partials/_card.pug
+      else 
+        p= error||message
+    if (!(success && !files))
+      button.wall-more-btn(type="button") Cargar Más

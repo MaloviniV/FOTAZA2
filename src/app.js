@@ -35,10 +35,10 @@ app.use((req, res, next) => {
 
 //Middleware de rutas
 app.use("/post", routes.postRoutes);
-//app.use("/image", routes.apiRoutes);
+app.use("/api", routes.apiRoutes);
 app.use("/auth", routes.authRoutes);
 app.use("/dashboard", requireAuth, routes.dashboardRoutes);
-app.use("/", routes.publicRoutes);
+app.use("/", routes.homeRoutes);
 
 //Manejo de errores
 app.use((req, res, next) => {

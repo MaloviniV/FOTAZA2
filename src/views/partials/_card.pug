@@ -1,24 +1,32 @@
 if files  
   each file in files
     .card(data-file-id=file.id)
-      a.card-link(href=`/post/${file.idPost}/file/${file.id}`)
+      a.card-link(href=currentUser ? `/post/${file.idPost}/file/${file.id}` : '/auth/login')
         if file.mimetype && file.mimetype.startsWith('video/')
-          video.card-media(src=file.path autoplay muted loop playsinline)
+          video.card-media(src=file.path autoplay muted loop playsinline oncontextmenu=file.textCopyright ? "return false;" : null)
         else
-          img.card-media(src=file.path alt=file.title || "Archivo" loading="lazy")
+          img.card-media(src=file.path alt=file.title || "Archivo" loading="lazy" oncontextmenu=file.textCopyright ? "return false;" : null draggable=file.textCopyright ? "false" : "true")
+        
+        if file.textCopyright
+          .copyright-badge(title=file.textCopyright)
+            i.fa-solid.fa-copyright
 
       //- HOVER
       .card-overlay
         .card-actions
-          button.action-btn.add-to-collection(title="Añadir a colección")
-            i.fa-solid.fa-bookmark
-          
-          button.action-btn.get-now-btn(title="Obtener ahora") Obtener ahora
+          if currentUser
+            button.action-btn.add-to-collection(title="Añadir a colección")
+              i.fa-solid.fa-bookmark
+            button.action-btn.get-now-btn(title="Obtener ahora") Obtener ahora
+          else
+            a.action-btn.add-to-collection(href="/auth/login" title="Inicia sesión para añadir a colección" style="color: inherit;")
+              i.fa-solid.fa-bookmark
+            a.action-btn.get-now-btn(href="/auth/login" title="Inicia sesión para obtener" style="color: inherit;") Obtener ahora
 
         - const userId = (file.Post && file.Post.User && file.Post.User.id) ? file.Post.User.id : ''
-        - const profileUrl = userId ? `/user/${userId}` : '#'
+        - const profileUrl = currentUser && userId ? `/user/${userId}` : '/auth/login'
         a.card-user(href=profileUrl )
-          - const avatar = (file.Post && file.Post.User && file.Post.User.avatar) ? file.Post.User.avatar : 'https://ui-avatars.com/api/?name=User&background=random'
+          - const avatar = (file.Post && file.Post.User && file.Post.User.avatarUrl) ? file.Post.User.avatarUrl : 'https://ui-avatars.com/api/?name=User&background=random'
           - const userName = (file.Post && file.Post.User && file.Post.User.nickname) ? file.Post.User.nickname : 'Usuario Desconocido'
           
           img.user-avatar(src=avatar alt=`Avatar de ${userName}`)

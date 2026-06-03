@@ -1,5 +1,7 @@
 import File from "../models/File.js";
 import Post from "../models/Post.js";
+import User from "../models/User.js";
+import Rating from "../models/Rating.js";
 import { LIST_TAGS } from "../utils/constants.js";
 
 //MUESTRA EL FORMULARIO PARA CARGAR/MODIFICAR 1 ARCHIVO
@@ -24,7 +26,12 @@ export const showFormFile = async (req, res) => {
       include: [
         {
           model: Post,
-          attributes: ["title"],
+          include: [
+            {
+              model: User,
+              attributes: ["id", "nickname", "avatarUrl"],
+            },
+          ],
         },
       ],
     });
@@ -125,7 +132,13 @@ export const showFile = async (req, res) => {
       include: [
         {
           model: Post,
-          attributes: ["title"],
+          attributes: ["title", "idUser"],
+          include: [
+            {
+              model: User,
+              attributes: ["id", "nickname", "avatarUrl"],
+            },
+          ],
         },
       ],
     });
@@ -138,11 +151,85 @@ export const showFile = async (req, res) => {
     }
 
     const file = response.toJSON();
+
+    const totalRatings = await Rating.count({ where: { idFile: fileId } });
+    const sumRatings = await Rating.sum("score", { where: { idFile: fileId } });
+
+    //Calculo del promedio
+    file.averageRating =
+      totalRatings > 0 ? (sumRatings / totalRatings).toFixed(1) : 0;
+    file.totalRatings = totalRatings;
+    file.userRating = 0; // Por defecto 0
+
+    if (req.user) {
+      const currentRating = await Rating.findOne({
+        where: { idFile: fileId, idUser: req.user.id },
+      });
+      if (currentRating) file.userRating = currentRating.score;
+    }
+
     res.render("post/fileDetail.pug", { file });
   } catch (error) {
     console.error("❌ Error al obtener el detalle del archivo:", error);
     res.render("post/fileDetail.pug", {
       error: "Error al intentar cargar el archivo",
+      postId,
+    });
+  }
+};
+
+// VALORAR UN ARCHIVO (1 a 5 estrellas)
+export const rateFile = async (req, res) => {
+  const { fileId } = req.params;
+  const { score } = req.body;
+
+  if (!req.user)
+    return res
+      .status(401)
+      .json({ success: false, error: "Debes iniciar sesión para valorar." });
+
+  try {
+    const userId = req.user.id;
+
+    let rating = await Rating.findOne({
+      where: { idUser: userId, idFile: fileId },
+    });
+
+    if (rating) {
+      rating.score = score;
+      await rating.save();
+    } else {
+      await Rating.create({ idUser: userId, idFile: fileId, score });
+    }
+
+    const totalRatings = await Rating.count({ where: { idFile: fileId } });
+    const sumRatings = await Rating.sum("score", { where: { idFile: fileId } });
+    const averageRating =
+      totalRatings > 0 ? (sumRatings / totalRatings).toFixed(1) : 0;
+
+    return res.json({
+      success: true,
+      message: "Valoración guardada exitosamente",
+      newScore: score,
+      newAverage: averageRating,
+      newTotal: totalRatings,
+    });
+  } catch (error) {
+    console.error("❌ Error al valorar archivo:", error);
+
+    if (
+      error.name === "SequelizeValidationError" ||
+      error.message.includes("propio archivo")
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "No puedes calificar tu propio archivo.",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: "Ocurrió un error al guardar la valoración",
     });
   }
 };

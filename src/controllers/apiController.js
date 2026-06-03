@@ -14,7 +14,7 @@ export const loadMoreFiles = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "nickname"],
+          attributes: ["id", "nickname", "avatarUrl"],
         },
       ],
     };

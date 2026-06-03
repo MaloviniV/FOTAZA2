@@ -18,6 +18,8 @@ export const seedTestData = async (testUser) => {
         birthdate: "1995-04-12",
         email: "ana@mail.com",
         password: "123",
+        avatarUrl:
+          "https://ui-avatars.com/api/?name=Ana+Garcia&background=random",
       },
       {
         firstName: "Carlos",
@@ -27,6 +29,8 @@ export const seedTestData = async (testUser) => {
         birthdate: "1988-10-20",
         email: "carlos@mail.com",
         password: "123",
+        avatarUrl:
+          "https://ui-avatars.com/api/?name=Carlos+Lopez&background=random",
       },
       {
         firstName: "María",
@@ -36,6 +40,8 @@ export const seedTestData = async (testUser) => {
         birthdate: "1992-07-05",
         email: "maria@mail.com",
         password: "123",
+        avatarUrl:
+          "https://ui-avatars.com/api/?name=Maria+Fernandez&background=random",
       },
     ];
 

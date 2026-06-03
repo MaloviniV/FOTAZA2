@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 });
 
 //Middleware de rutas
-app.use("/post", routes.postRoutes);
+app.use("/post", requireAuth, routes.postRoutes);
 app.use("/api", routes.apiRoutes);
 app.use("/auth", routes.authRoutes);
 app.use("/dashboard", requireAuth, routes.dashboardRoutes);
@@ -89,6 +89,8 @@ import { seedTestData } from "./seeders/testSeeder.js";
         birthdate: "1988-02-20",
         password: "1111",
         role: "usuario",
+        avatarUrl:
+          "https://ui-avatars.com/api/?name=Vic+Malo&background=random",
       },
     });
 

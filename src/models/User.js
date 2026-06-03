@@ -47,6 +47,10 @@ User.init(
       allowNull: false,
       defaultValue: ROLES.USER,
     },
+    avatarUrl: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
     suspendedAt: {
       type: DataTypes.DATE,
       allowNull: true,

@@ -7,11 +7,11 @@ block content
   //- --- Seccion CABECERA ---
   section#main-user
     #profile-user
-      if (user)
+      if (currentUser)
         #photoProfile.profile-user
-          img(src=(user.avatar_url || '/imagenes/avatar/default-avatar.png') alt="Foto de perfil")
+          img(src=(currentUser.avatarUrl || '/imagenes/avatar/default-avatar.png') alt="Foto de perfil")
         #info-user.profile-user
-          h2= user.nickname || user.fullname
+          h2= currentUser.nickname || currentUser.firstName
         #statistics.profile-user
           h4 Uploads: #{numberOfFiles}
           h4 Posts: #{numberOfPosts}

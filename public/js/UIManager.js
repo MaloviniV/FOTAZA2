@@ -16,11 +16,10 @@ export class UIManager {
     this.#addEventListeners();
     this.#initUserMenu();
     this.#highlightLink();
-
   }
 
   #addEventListeners() {
-    if(this.searchForm && this.searchInput){
+    if (this.searchForm && this.searchInput) {
       this.searchForm.addEventListener("submit", (e) => {
         e.preventDefault();
         this.#performSearch();
@@ -28,14 +27,11 @@ export class UIManager {
     }
   }
 
-  //HARDCODEADO HACER FETCH AL SERVIDOR
   #performSearch() {
     const searchTerm = this.searchInput.value.trim();
 
-    if(searchTerm){
-      //hardcodeado, fetch al servidor
-      console.log(`BUSCAR ${searchTerm}`);
-      this.searchInput.value = "";
+    if (searchTerm) {
+      window.location.href = `/search?q=${encodeURIComponent(searchTerm)}`;
     }
   }
 
@@ -45,22 +41,22 @@ export class UIManager {
         event.stopPropagation();
         this.userMenuItem.classList.toggle("open");
       });
-  
+
       document.addEventListener("click", (event) => {
         if (!this.userMenuItem.contains(event.target)) {
           this.userMenuItem.classList.remove("open");
         }
       });
-  
+
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           this.userMenuItem.classList.remove("open");
         }
-      });      
+      });
     }
   }
 
-  #highlightLink(){
+  #highlightLink() {
     const currentPath = window.location.pathname;
 
     this.navItems.forEach((item) => {

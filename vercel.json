@@ -9,7 +9,7 @@
       }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
       "source": "/(.*)",
       "destination": "/src/app.js"

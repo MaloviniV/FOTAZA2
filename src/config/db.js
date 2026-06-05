@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import { database, server } from "./config.js";
+import pg from "pg";
 
 export const sequelize = new Sequelize(
   database.name || "postgres",
@@ -8,6 +9,7 @@ export const sequelize = new Sequelize(
   {
     host: database.host || "localhost",
     dialect: database.dialect || "postgres",
+    dialectModule: pg,
     logging: server.debug ? console.log : false,
     dialectOptions: process.env.VERCEL
       ? {

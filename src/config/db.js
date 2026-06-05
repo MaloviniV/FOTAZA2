@@ -2,11 +2,11 @@ import { Sequelize } from "sequelize";
 import { database, server } from "./config.js";
 
 export const sequelize = new Sequelize(
-  database.name,
-  database.user,
-  database.password,
+  database.name || "postgres",
+  database.user || "postgres",
+  database.password || "",
   {
-    host: database.host,
+    host: database.host || "localhost",
     dialect: database.dialect || "postgres",
     logging: server.debug ? console.log : false,
     dialectOptions: process.env.VERCEL

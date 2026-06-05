@@ -7,7 +7,7 @@ export const sequelize = new Sequelize(
   database.password,
   {
     host: database.host,
-    dialect: database.dialect,
+    dialect: database.dialect || "postgres",
     logging: server.debug ? console.log : false,
     dialectOptions: process.env.VERCEL
       ? {

@@ -106,7 +106,6 @@ import { seedTestData } from "./seeders/testSeeder.js";
     } else {
       console.error("Error critico: No se pudo conectar a la base de datos.");
     }
-    process.exit(1);
   }
 
   if (!process.env.VERCEL) {
@@ -121,7 +120,6 @@ import { seedTestData } from "./seeders/testSeeder.js";
       } else {
         console.error("Error al arrancar el servidor Express:", error);
       }
-      process.exit(1);
     });
   }
 })();

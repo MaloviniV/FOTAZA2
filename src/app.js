@@ -109,17 +109,21 @@ import { seedTestData } from "./seeders/testSeeder.js";
     process.exit(1);
   }
 
-  const PORT = server.port;
-  const expressServer = app.listen(PORT, () => {
-    console.log(`Servidor corriendo en: http://localhost:${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    const PORT = server.port;
+    const expressServer = app.listen(PORT, () => {
+      console.log(`Servidor corriendo en: http://localhost:${PORT}`);
+    });
 
-  expressServer.on("error", (error) => {
-    if (error.code === "EADDRINUSE") {
-      console.error(`Error critico: El puerto ${PORT} ya esta en uso.`);
-    } else {
-      console.error("Error al arrancar el servidor Express:", error);
-    }
-    process.exit(1);
-  });
+    expressServer.on("error", (error) => {
+      if (error.code === "EADDRINUSE") {
+        console.error(`Error critico: El puerto ${PORT} ya esta en uso.`);
+      } else {
+        console.error("Error al arrancar el servidor Express:", error);
+      }
+      process.exit(1);
+    });
+  }
 })();
+
+export default app;

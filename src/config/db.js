@@ -9,6 +9,20 @@ export const sequelize = new Sequelize(
     host: database.host,
     dialect: database.dialect,
     logging: server.debug ? console.log : false,
+    dialectOptions: process.env.VERCEL
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
+    pool: {
+      max: process.env.VERCEL ? 2 : 5,
+      min: 0,
+      acquire: 30000,
+      idle: process.env.VERCEL ? 0 : 10000,
+    },
   },
 );
 
@@ -18,7 +32,7 @@ export const connectDatabase = async () => {
     console.log("✅ Conexión a PostgreSQL establecida con éxito.");
 
     if (database.sync) {
-      await sequelize.sync({ alter: true});
+      await sequelize.sync({ alter: true });
       console.log("✅ BD sincronizada con exito");
       //CONSTRAINTS
       await sequelize.query(`

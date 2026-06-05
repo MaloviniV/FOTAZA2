@@ -3,6 +3,7 @@ import Post from "../models/Post.js";
 import User from "../models/User.js";
 import Rating from "../models/Rating.js";
 import Comment from "../models/Comment.js";
+import { put, del } from "@vercel/blob";
 import { LIST_TAGS } from "../utils/constants.js";
 
 //MUESTRA EL FORMULARIO PARA CARGAR/MODIFICAR 1 ARCHIVO
@@ -121,10 +122,16 @@ export const createFile = async (req, res) => {
 
     const { mimetype } = req.file;
 
-    let path = req.file.path.replace(/\\/g, "/");
-    if (path.startsWith("public/")) {
-      path = path.replace("public/", "/");
-    }
+    // Subimos el archivo a Vercel Blob usando su buffer
+    const blob = await put(
+      `fotaza/${Date.now()}-${req.file.originalname}`,
+      req.file.buffer,
+      {
+        access: "public",
+      },
+    );
+
+    const path = blob.url; // Obtiene la URL publica generada
 
     if (!selectedTags) {
       return res.status(400).json({
@@ -328,13 +335,18 @@ export const updateFile = async (req, res) => {
       textCopyright,
     };
 
-    // Si el usuario subió un archivo nuevo, actualizamos el path y mimetype
+
     if (req.file) {
-      let newPath = req.file.path.replace(/\\/g, "/");
-      if (newPath.startsWith("public/")) {
-        newPath = newPath.replace("public/", "/");
-      }
-      updateData.path = newPath;
+      // Subo el nuevo archivo a Vercel Blob
+      const blob = await put(
+        `fotaza/${Date.now()}-${req.file.originalname}`,
+        req.file.buffer,
+        {
+          access: "public",
+        },
+      );
+
+      updateData.path = blob.url;
       updateData.mimetype = req.file.mimetype;
     }
 
@@ -364,6 +376,21 @@ export const deleteFile = async (req, res) => {
   const fileId = req.params.fileId;
 
   try {
+    // Busco el archivo para obtener su URL de Vercel Blob antes de borrarlo
+    const file = await File.findByPk(fileId);
+
+    if (
+      file &&
+      file.path &&
+      file.path.includes("public.blob.vercel-storage.com")
+    ) {
+      try {
+        await del(file.path);
+      } catch (err) {
+        console.error("Error al borrar de Vercel Blob:", err);
+      }
+    }
+
     const deleteRow = await File.destroy({ where: { id: fileId } });
 
     if (deleteRow === 0) {
@@ -387,12 +414,10 @@ export const deleteComment = async (req, res) => {
   const { commentId } = req.params;
 
   if (!req.user) {
-    return res
-      .status(401)
-      .json({
-        success: false,
-        error: "Debes iniciar sesión para realizar esta acción.",
-      });
+    return res.status(401).json({
+      success: false,
+      error: "Debes iniciar sesión para realizar esta acción.",
+    });
   }
 
   try {
@@ -404,23 +429,19 @@ export const deleteComment = async (req, res) => {
         .json({ success: false, error: "El comentario no existe." });
 
     if (comment.idUser !== req.user.id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          error: "No tienes permiso para borrar este comentario.",
-        });
+      return res.status(403).json({
+        success: false,
+        error: "No tienes permiso para borrar este comentario.",
+      });
     }
 
     await comment.destroy();
     res.json({ success: true, message: "Comentario borrado correctamente." });
   } catch (error) {
     console.error("❌ Error al borrar comentario:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Ocurrió un error al intentar borrar el comentario.",
-      });
+    res.status(500).json({
+      success: false,
+      error: "Ocurrió un error al intentar borrar el comentario.",
+    });
   }
 };

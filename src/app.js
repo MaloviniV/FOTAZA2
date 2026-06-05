@@ -96,8 +96,8 @@ import { seedTestData } from "./seeders/testSeeder.js";
       },
     });
 
-    if (testUser) {
-      // Ejecutar los datos de prueba
+    if (created) {
+      // Ejecutar los datos de prueba SOLO la primera vez que se crea la BD
       await seedTestData(testUser);
     }
   } catch (error) {

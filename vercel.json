@@ -11,18 +11,6 @@
   ],
   "rewrites": [
     {
-      "source": "/css/(.*)",
-      "destination": "/css/$1"
-    },
-    {
-      "source": "/js/(.*)",
-      "destination": "/js/$1"
-    },
-    {
-      "source": "/imagenes/(.*)",
-      "destination": "/imagenes/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/src/app.js"
     }

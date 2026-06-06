@@ -1,39 +1,34 @@
 import express from "express";
-import { server } from "./config/config.js";
-import { connectDatabase, sequelize } from "./config/db.js";
-import "./models/index.js";
+import session from "express-session";
+import connectSessionSequelize from "connect-session-sequelize";
 import path from "path";
 import { fileURLToPath } from "url";
 
-//Importacion de routes
-import * as routes from "./routes/indexRoutes.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
-import AppError from "./utils/AppError.js";
+import { server } from "./config/config.js";
+import { connectDatabase, sequelize } from "./config/db.js";
+import "./models/index.js";
+
+import routes from "./routes/indexRoutes.js";
 import { requireAuth } from "./middlewares/authMidleware.js";
-import session from "express-session";
-import connectSessionSequelize from "connect-session-sequelize";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//Inicializar Express
 const app = express();
 
-//Configurar PUG
+//Configuracion Motor de Vistas (PUG)
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
-//Middlewares
-app.use(express.urlencoded({ extended: true })); //Para leer datos de formularios
-app.use(express.json()); //Para leer datos en JSON
-app.use(express.static(path.join(__dirname, "..", "public"))); //Donde buscar archivos estaticos
+//Middlewares Generales
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "..", "public")));
 
+//Configuracion de Sesiones en BD
 const SequelizeStore = connectSessionSequelize(session.Store);
-const sessionStore = new SequelizeStore({
-  db: sequelize,
-});
+const sessionStore = new SequelizeStore({ db: sequelize });
 
-// express-session
 app.use(
   session({
     secret: server.sessionSecret,
@@ -41,87 +36,61 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24,
-    },
+      secure: server.isProduction,  //en produccion HTTPS(true), en desarrollo HTTP(false)
+      maxAge: 1000 * 60 * 60 * 24
+    }
   }),
 );
 
-// Middleware global para inyectar la sesión en req.user
+//Middleware global para vistas (inyecta la sesion)
 app.use((req, res, next) => {
   req.user = req.session.user || null;
   res.locals.currentUser = req.session.user || null;
   next();
 });
 
-//Middleware de rutas
+//Rutas de la aplicacion
 app.use("/post", requireAuth, routes.postRoutes);
-app.use("/api", routes.apiRoutes);
-app.use("/auth", routes.authRoutes);
 app.use("/dashboard", requireAuth, routes.dashboardRoutes);
 app.use("/user", requireAuth, routes.userRoutes);
+app.use("/api", routes.apiRoutes);
+app.use("/auth", routes.authRoutes);
 app.use("/search", routes.searchRoutes);
 app.use("/", routes.homeRoutes);
 
-//Manejo de errores
+//Manejo de Errores (rutas no encontradas)
 app.use((req, res, next) => {
-  //Rutas no encontradas
-  next(new AppError(`No se encontro la ruta ${req.originalUrl}`, 404));
+  const err = new Error(`💥 No se encontró la ruta ${req.originalUrl}`);
+  err.statusCode = 404;
+  next(err);
 });
-app.use(errorHandler); //Errores generales
 
-//Levantar el servidor y BD
-import User from "./models/User.js";
-import { seedTestData } from "./seeders/testSeeder.js";
-(async () => {
+//Middleware Global de Manejo de Errores
+app.use((err, req, res, next) => {
+  console.error("💥 ERROR ATRAPADO:", err.message);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    error: err.message || "Error interno del servidor",
+  });
+});
+
+//Inicializacion del Servidor y Base de Datos
+const startApp = async () => {
   try {
     await connectDatabase();
-
-    // Sincronizar la tabla de sesiones en la BD
     await sessionStore.sync();
-
-    //FORZADO DE INICIO DE SESION CON USUARIO EN BD Y CREACION SI NO EXISTE
-    const [testUser, created] = await User.findOrCreate({
-      where: { email: "mail@mail.com" },
-      defaults: {
-        firstName: "Vic",
-        lastName: "Malo",
-        nickname: "@testVic",
-        dni: "11111111",
-        birthdate: "1988-02-20",
-        password: "1111",
-        role: "usuario",
-        avatarUrl:
-          "https://ui-avatars.com/api/?name=Vic+Malo&background=random",
-      },
-    });
-
-    if (created) {
-      // Ejecutar los datos de prueba SOLO la primera vez que se crea la BD
-      await seedTestData(testUser);
-    }
   } catch (error) {
-    if (server.debug) {
-      console.error("Error al inicializar la base de datos:", error);
-    } else {
-      console.error("Error critico: No se pudo conectar a la base de datos.");
-    }
+    console.error("Error al inicializar la base de datos:", error);
   }
 
-  if (!process.env.VERCEL) {
-    const PORT = server.port;
-    const expressServer = app.listen(PORT, () => {
-      console.log(`Servidor corriendo en: http://localhost:${PORT}`);
-    });
-
-    expressServer.on("error", (error) => {
-      if (error.code === "EADDRINUSE") {
-        console.error(`Error critico: El puerto ${PORT} ya esta en uso.`);
-      } else {
-        console.error("Error al arrancar el servidor Express:", error);
-      }
+  // Levantar el servidor (Omitido en Vercel)
+  if (!server.isProduction) {
+    app.listen(server.port, () => {
+      console.log(`Servidor corriendo en: http://localhost:${server.port}`);
     });
   }
-})();
+};
+
+startApp();
 
 export default app;

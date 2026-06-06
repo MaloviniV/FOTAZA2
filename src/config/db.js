@@ -3,92 +3,102 @@ import { database, server } from "./config.js";
 import pg from "pg";
 
 export const sequelize = new Sequelize(
-  database.name || "postgres",
-  database.user || "postgres",
-  database.password || "",
+  database.name,
+  database.user,
+  database.password,
   {
-    host: database.host || "localhost",
-    dialect: database.dialect || "postgres",
+    host: database.host,
+    dialect: database.dialect,
     dialectModule: pg,
-    logging: server.debug ? console.log : false,
-    dialectOptions: process.env.VERCEL
+    //logging: server.debug ? console.log : false,
+    dialectOptions: server.isProduction
       ? {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false,
-          },
+          ssl: { require: true, rejectUnauthorized: false },
         }
       : {},
     pool: {
-      max: process.env.VERCEL ? 2 : 5,
+      max: server.isProduction ? 2 : 5,
       min: 0,
       acquire: 30000,
-      idle: process.env.VERCEL ? 0 : 10000,
+      idle: server.isProduction ? 0 : 10000,
     },
   },
 );
 
+//CONSTRAINTS Y TRIGGERS
+const applyConstraintsAndTriggers = async () => {
+  //CONSTRAINT: Un usuario no puede seguirse a si mismo
+  await sequelize.query(`
+    DO $$ 
+    BEGIN
+        ALTER TABLE "follows" DROP CONSTRAINT IF EXISTS "seguirse";
+        
+        ALTER TABLE "follows" 
+        ADD CONSTRAINT "seguirse" 
+        CHECK ("followerId" <> "followingId");
+    END $$;
+  `);
+
+  //CONSTRAINT: Controla que la valoracion este entre 1 y 5
+  await sequelize.query(`
+    DO $$
+    BEGIN
+        ALTER TABLE "ratings" DROP CONSTRAINT IF EXISTS "score_range";
+
+        ALTER TABLE "ratings"
+        ADD CONSTRAINT "score_range"
+        CHECK (score >= 1 AND score <= 5);
+    END $$;
+  `);
+
+  //TRIGGER: Evita que un usuario califique su propio archivo
+  await sequelize.query(`
+    CREATE OR REPLACE FUNCTION check_self_rating()
+    RETURNS TRIGGER AS $$
+    DECLARE
+        owner_id INTEGER;
+    BEGIN
+        SELECT p."idUser" INTO owner_id
+        FROM "files" f
+        JOIN "posts" p ON f."idPost" = p."id"
+        WHERE f."id" = NEW."idFile";
+        
+        IF owner_id = NEW."idUser" THEN
+            RAISE EXCEPTION 'Un usuario no puede calificar su propio archivo.';
+        END IF;
+        
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+  `);
+
+  await sequelize.query(`
+    DROP TRIGGER IF EXISTS trg_check_self_rating ON "ratings";
+    CREATE TRIGGER trg_check_self_rating
+    BEFORE INSERT OR UPDATE ON "ratings"
+    FOR EACH ROW
+    EXECUTE FUNCTION check_self_rating();
+  `);
+
+  console.log("✅ Restricciones y Triggers personalizados aplicados.");
+};
+
 export const connectDatabase = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("✅ Conexión a PostgreSQL establecida con éxito.");
+  await sequelize.authenticate();
+  console.log("✅ Conexión a PostgreSQL establecida con éxito.");
 
-    if (database.sync) {
-      await sequelize.sync({ alter: true });
-      console.log("✅ BD sincronizada con exito");
-      //CONSTRAINTS
-      await sequelize.query(`
-        DO $$ 
-        BEGIN
-            ALTER TABLE "follows" DROP CONSTRAINT IF EXISTS "seguirse";
-            
-            ALTER TABLE "follows" 
-            ADD CONSTRAINT "seguirse" 
-            CHECK ("followerId" <> "followingId");
-        END $$;
-      `);
-      await sequelize.query(`
-        DO $$
-        BEGIN
-            ALTER TABLE "ratings" DROP CONSTRAINT IF EXISTS "score_range";
+  if (database.sync) {
+    await sequelize.sync({ alter: true });
+    console.log("✅ BD sincronizada con éxito.");
 
-            ALTER TABLE "ratings"
-            ADD CONSTRAINT "score_range"
-            CHECK (score >= 1 AND score <= 5);
-        END $$;
-      `);
+    await applyConstraintsAndTriggers();
 
-      // Trigger para evitar que un usuario se califique a sí mismo
-      await sequelize.query(`
-        CREATE OR REPLACE FUNCTION check_self_rating()
-        RETURNS TRIGGER AS $$
-        DECLARE
-            owner_id INTEGER;
-        BEGIN
-            SELECT p."idUser" INTO owner_id
-            FROM "files" f
-            JOIN "posts" p ON f."idPost" = p."id"
-            WHERE f."id" = NEW."idFile";
-            
-            IF owner_id = NEW."idUser" THEN
-                RAISE EXCEPTION 'Un usuario no puede calificar su propio archivo.';
-            END IF;
-            
-            RETURN NEW;
-        END;
-        $$ LANGUAGE plpgsql;
-      `);
-      await sequelize.query(`
-        DROP TRIGGER IF EXISTS trg_check_self_rating ON "ratings";
-        CREATE TRIGGER trg_check_self_rating
-        BEFORE INSERT OR UPDATE ON "ratings"
-        FOR EACH ROW
-        EXECUTE FUNCTION check_self_rating();
-      `);
-    } else {
-      console.log("⚠️  BD no sincronizada, habilita la sincronizacion en .env");
-    }
-  } catch (error) {
-    throw error;
+    // Poblamos la base de datos con datos de prueba si está vacía
+    const { seedTestData } = await import("../seeders/testSeeder.js");
+    await seedTestData();
+  } else {
+    console.log(
+      "⚠️  BD no sincronizada. (Habilita DB_SYNC en .env si necesitas cambios)",
+    );
   }
 };

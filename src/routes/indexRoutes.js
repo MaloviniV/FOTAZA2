@@ -6,7 +6,7 @@ import postRoutes from "./postRoutes.js";
 import userRoutes from "./userRoutes.js";
 import searchRoutes from "./searchRoutes.js";
 
-export {
+export default {
   homeRoutes,
   dashboardRoutes,
   postRoutes,

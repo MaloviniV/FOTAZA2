@@ -1,0 +1,11 @@
+extends ./layouts/main.pug
+include ./mixin/feedbackModal.pug
+
+block content
+  +feedbackModal(
+    "error",
+    title || "Error",
+    message || "Ha ocurrido un error inesperado.",
+    "Volver al inicio",
+    "/"
+  )

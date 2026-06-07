@@ -23,6 +23,7 @@ Rating.init(
         model: "files",
         key: "id",
       },
+      onDelete: "CASCADE",
     },
     score: {
       type: DataTypes.INTEGER,

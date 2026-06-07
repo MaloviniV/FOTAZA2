@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from "bcrypt";
 //Devuelve la vista de login
 export const login = (req, res) => {
   const { email, name } = req.query;
@@ -7,11 +8,14 @@ export const login = (req, res) => {
 //Procesa el formulario de login
 export const processLogin = async (req, res) => {
   const { email, password } = req.body;
-  //******* PONER HASH DE CONTRASEÑA **************
   try {
     const user = await User.findOne({ where: { email } });
 
-    if (user && user.password === password) {
+    const passwordMatch = user
+      ? await bcrypt.compare(password, user.password)
+      : false;
+
+    if (user && passwordMatch) {
       req.session.user = {
         id: user.id,
         firstName: user.firstName,
@@ -46,7 +50,9 @@ export const prossesRegister = async (req, res) => {
     req.body;
 
   try {
-  //******* PONER HASH DE CONTRASEÑA **************
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const newUser = await User.create({
       firstName,
       lastName,
@@ -54,7 +60,7 @@ export const prossesRegister = async (req, res) => {
       dni,
       birthdate,
       email,
-      password,
+      password: hashedPassword,
     });
 
     res.redirect(

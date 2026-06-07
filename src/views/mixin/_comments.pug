@@ -1,0 +1,46 @@
+mixin comments(entity, postUrl, isFile)
+  .card.border-0.shadow-sm.rounded-4.bg-white
+    .card-body.p-4.p-md-5
+      h3.fw-bold.text-dark.mb-4 Comentarios
+      
+      if entity.openComments
+        form.mb-5(action=postUrl method="POST")
+          .form-floating.mb-3
+            textarea.form-control.rounded-3(name="commentText" id="commentText" style="height: 100px" placeholder="Escribe tu comentario aquí..." required)
+            label.text-secondary(for="commentText") Escribe tu comentario aquí...
+          .d-flex.justify-content-end
+            button.btn.btn-primary.rounded-pill.px-4.fw-bold(type="submit") 
+              i.fa-solid.fa-paper-plane.me-2
+              | Enviar comentario
+      else
+        .alert.alert-secondary.rounded-3.text-center.mb-5
+          i.fa-solid.fa-lock.me-2
+          | Los comentarios están cerrados.
+
+      //- Lista de comentarios
+      if entity.Comments && entity.Comments.length > 0
+        .d-flex.flex-column.gap-4
+          each comment in entity.Comments
+            .d-flex.gap-3
+              - const commentUser = comment.User || {}
+              - const canDelete = currentUser && currentUser.id === commentUser.id && entity.idPost && entity.id && comment.id
+
+              .flex-shrink-0
+                a(href=(commentUser.id ? `/user/${commentUser.id}` : '#') style="text-decoration: none;")
+                  if commentUser.avatarUrl
+                    img.rounded-circle.object-fit-cover(src=commentUser.avatarUrl alt=`Avatar de ${commentUser.nickname}` width="48" height="48")
+                  else
+                    .bg-primary.text-white.rounded-circle.d-flex.align-items-center.justify-content-center.fw-bold.fs-5(style="width: 48px; height: 48px;")
+                      = (commentUser.firstName) ? commentUser.firstName.charAt(0).toUpperCase() : 'U'
+              .flex-grow-1.bg-light.rounded-4.p-3.p-md-4
+                .d-flex.justify-content-between.align-items-center.mb-2
+                  div(style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;")
+                    a.fw-bold.text-dark.text-decoration-none(href=(commentUser.id ? `/user/${commentUser.id}` : '#'))= commentUser.nickname || 'Usuario Anónimo'
+                    span.text-secondary.small= new Date(comment.createdAt).toLocaleDateString()
+                  if canDelete
+                    button.btn.btn-sm.btn-outline-danger.border-0.rounded-circle.btn-delete-comment(data-post-id=entity.idPost data-file-id=entity.id data-comment-id=comment.id title="Borrar comentario")
+                      i.fa-solid.fa-trash
+                p.text-secondary.mb-0= comment.text
+      else
+        .text-center.py-4
+          p.text-muted.mb-0 No hay comentarios aún. ¡Sé el primero en opinar!

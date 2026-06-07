@@ -1,32 +1,38 @@
-extends ../layout.pug
+extends ../layouts/main.pug
+include ../mixin/_emptyState.pug
 
 block metadata
-  link(rel="stylesheet", href="/css/postsStyle.css")
 
 block content
-  section.dashboard-section
-    .header-actions
-      h2 Mis Posts
-      a.action-btn.secondary(href="/dashboard") &larr; Volver al Dashboard
-      a.action-btn.primary(href="/post/showFormPost") + Nuevo Post
+  .container.py-5
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h1.fw-bold.text-dark Mis Posts
+      div
+        a.btn.btn-outline-secondary.rounded-pill.px-4.me-2(href="/dashboard") 
+          i.fa-solid.fa-arrow-left.me-2
+          | Volver al Dashboard
+        a.btn.btn-primary.rounded-pill.px-4.fw-bold.shadow-sm(href="/post/showFormPost") 
+          i.fa-solid.fa-plus.me-2
+          | Nuevo Post
 
-    //- Contenedor donde irán las tarjetas de los posts
-    #cards-container.posts-grid
-      if posts && posts.length > 0
+    if posts && posts.length > 0
+      .row.g-4
         each post in posts
-          a.cardPost-container(href=`/post/${post.id}`)
-            .image-container
-              if post.Files && post.Files.length > 0
-                img(src=post.Files[0].path alt=post.title)
-              else
-                img(src="/imagenes/default-image.png" alt="Sin imagen")
-
-              p.files-count #{post.Files ? post.Files.length : 0} archivo(s)
-            .metadata-container
-              h3= post.title
-              p= post.description
-
-      else if error 
-        p.empty-message= error
-      else
-        p.empty-message Aún no tienes ningún post. ¡Anímate a subir tu primera foto!
+          .col-md-6.col-lg-4
+            a.card.h-100.border-0.shadow-sm.rounded-4.text-decoration-none.hover-zoom(href=`/post/${post.id}`)
+              .ratio.ratio-16x9
+                if post.Files && post.Files.length > 0
+                  img.card-img-top.object-fit-cover(src=post.Files[0].path, alt=post.title)
+                else
+                  .bg-light.d-flex.align-items-center.justify-content-center
+                    i.fa-solid.fa-image.text-secondary(style="font-size: 2rem;")
+              .card-body
+                h5.fw-bold.text-dark= post.title
+                p.text-secondary.small= post.description || 'Sin descripción.'
+              .card-footer.bg-white.border-0.d-flex.justify-content-between.align-items-center
+                span.text-secondary.small #{post.Files ? post.Files.length : 0} archivo(s)
+                i.fa-solid.fa-arrow-right.text-primary
+    else if error
+      .alert.alert-danger= error
+    else
+      +emptyState('images', 'Aún no tienes posts', '¡Anímate a crear tu primer álbum y subir una foto!', true)

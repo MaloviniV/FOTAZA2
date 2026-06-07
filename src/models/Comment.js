@@ -25,6 +25,7 @@ Comment.init(
         model: "files",
         key: "id",
       },
+      onDelete: "CASCADE",
     },
     text: {
       type: DataTypes.STRING(500),

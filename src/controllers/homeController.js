@@ -1,6 +1,7 @@
 import File from "../models/File.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import { sequelize } from "../config/db.js";
 import { Op } from "sequelize";
 
 const LIMIT = 10;
@@ -21,7 +22,14 @@ const getWallPublicFiles = async (currentUserId, offset = 0) => {
   }
 
   return await File.findAll({
-    order: [], // ************ CARGAR EL ORDEN EN QUE SE MUESTREN LAS IMAGENES (mejor valoradas)*****************
+    order: [
+      [
+        sequelize.literal(
+          '(SELECT AVG(score) FROM "ratings" WHERE "ratings"."idFile" = "File"."id")',
+        ),
+        "DESC NULLS LAST",
+      ],
+    ],
     limit: LIMIT,
     offset,
     include: [postInclude],
@@ -58,7 +66,7 @@ export const loadMoreFiles = async (req, res) => {
 
     const files = await getWallPublicFiles(currentUserId, offset);
 
-    if (files.length === 0) res.json({ success: true, files});
+    if (files.length === 0) res.json({ success: true, files });
 
     return res.render("partials/_card.pug", { success: true, files });
   } catch (error) {

@@ -1,37 +1,41 @@
-extends ../layout.pug
+extends ../layouts/main.pug
 
 block metadata
-  link(rel="stylesheet", href="/css/dashboardStyle.css")
 
 block content
-  //- --- Seccion CABECERA ---
-  section#main-user
-    #profile-user
-      if (currentUser)
-        #photoProfile.profile-user
-          img(src=(currentUser.avatarUrl || '/imagenes/avatar/default-avatar.png') alt="Foto de perfil")
-        #info-user.profile-user
-          h2= currentUser.nickname || currentUser.firstName
-        #statistics.profile-user
-          h4 Uploads: #{numberOfFiles}
-          h4 Posts: #{numberOfPosts}
-          h4 Followings: #{numberOfFollowings}
-          h4 Followers: #{numberOfFollowers}
-      else 
-        h2 No hay usuario cargado
+  .container.py-5
+    if (currentUser)
+      //- --- CABECERA DE PERFIL ---
+      - const user = currentUser
+      include ../partials/_userHeader.pug
+    else 
+      .alert.alert-warning.text-center.rounded-4 No hay usuario cargado en la sesión
 
-    //- Accesos a las vistas
-    .views-navigation-container
-      h3 Explora tu contenido
-      .nav-cards
-        a.nav-card(href="/dashboard/posts")
-          h4 Mis Posts
-          p Administra y visualiza todas tus fotografías subidas.
-        
-        a.nav-card(href="/dashboard/collections")
-          h4 Colecciones
-          p Organiza tus fotos favoritas en diferentes álbumes.
-          
-        a.nav-card(href="/dashboard/following")
-          h4 Seguidos
-          p Mira la actividad y las fotos de las personas que sigues.
+    //- --- VISTAS ---
+    .mb-4
+      h3.fw-bold.text-dark Explora tu contenido
+    
+    .row.g-4
+      .col-md-4
+        a.card.h-100.border-0.shadow-sm.rounded-4.text-decoration-none.hover-zoom.bg-white(href="/dashboard/posts")
+          .card-body.p-4.text-center
+            .d-inline-flex.align-items-center.justify-content-center.bg-primary-subtle.text-primary.rounded-circle.mb-3(style="width: 64px; height: 64px;")
+              i.fa-solid.fa-images.fs-3
+            h4.fw-bold.text-dark Mis Posts
+            p.text-secondary.mb-0 Administra y visualiza todas tus fotografías subidas.
+      
+      .col-md-4
+        a.card.h-100.border-0.shadow-sm.rounded-4.text-decoration-none.hover-zoom.bg-white(href="/dashboard/collections")
+          .card-body.p-4.text-center
+            .d-inline-flex.align-items-center.justify-content-center.bg-primary-subtle.text-primary.rounded-circle.mb-3(style="width: 64px; height: 64px;")
+              i.fa-solid.fa-bookmark.fs-3
+            h4.fw-bold.text-dark Colecciones
+            p.text-secondary.mb-0 Organiza tus fotos favoritas en diferentes álbumes.
+            
+      .col-md-4
+        a.card.h-100.border-0.shadow-sm.rounded-4.text-decoration-none.hover-zoom.bg-white(href="/dashboard/following")
+          .card-body.p-4.text-center
+            .d-inline-flex.align-items-center.justify-content-center.bg-primary-subtle.text-primary.rounded-circle.mb-3(style="width: 64px; height: 64px;")
+              i.fa-solid.fa-users.fs-3
+            h4.fw-bold.text-dark Seguidos
+            p.text-secondary.mb-0 Mira la actividad y las fotos de las personas que sigues.

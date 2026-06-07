@@ -1,7 +1,7 @@
 node_modules/
 .env
-imagenes/
 .vscode/
 test/
 public/uploads/
-public/css/
+public/css2/
+public/js2/

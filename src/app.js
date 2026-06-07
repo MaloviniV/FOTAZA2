@@ -53,7 +53,6 @@ app.use((req, res, next) => {
 app.use("/post", requireAuth, routes.postRoutes);
 app.use("/dashboard", requireAuth, routes.dashboardRoutes);
 app.use("/user", requireAuth, routes.userRoutes);
-app.use("/api", routes.apiRoutes);
 app.use("/auth", routes.authRoutes);
 app.use("/search", routes.searchRoutes);
 app.use("/", routes.homeRoutes);

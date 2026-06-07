@@ -1,0 +1,36 @@
+.card.border-0.shadow-sm.rounded-4.mb-5.bg-white
+  .card-body.p-4.p-md-5
+    .row.align-items-center.text-center.text-md-start
+      .col-md-auto.mb-4.mb-md-0
+        img.rounded-circle.object-fit-cover.border.border-4.border-white.shadow-sm(src=(user.avatarUrl || '/imagenes/avatar/default-avatar.png') alt=`Foto de ${user.nickname}` width="150" height="150")
+      .col-md
+        h2.fw-bold.text-dark.mb-1= user.nickname || user.firstName
+        if user.createdAt
+          p.text-secondary.mb-4 Miembro desde #{new Date(user.createdAt).getFullYear()}
+        else
+          p.text-secondary.mb-4 Miembro de FOTAZA 2
+        
+        //- ESTADISTICAS
+        .d-flex.justify-content-center.justify-content-md-start.gap-4.gap-md-5.flex-wrap.mb-4
+          .text-center
+            h4.fw-bold.text-primary.mb-0 #{numberOfFiles || 0}
+            span.text-secondary.small.text-uppercase.fw-semibold Uploads
+          .text-center
+            h4.fw-bold.text-primary.mb-0 #{numberOfPosts || 0}
+            span.text-secondary.small.text-uppercase.fw-semibold Posts
+          .text-center
+            h4.fw-bold.text-primary.mb-0 #{numberOfFollowings || 0}
+            span.text-secondary.small.text-uppercase.fw-semibold Seguidos
+          .text-center
+            h4.fw-bold.text-primary.mb-0#followers-count #{numberOfFollowers || 0}
+            span.text-secondary.small.text-uppercase.fw-semibold Seguidores
+        
+        //- BOTON SEGUIR (solo si no es perfil del usuario actual)
+        if currentUser && user.id !== currentUser.id
+          button#btn-follow.btn.rounded-pill.px-4.fw-bold.shadow-sm(class=(isFollowing ? "btn-outline-primary" : "btn-primary") data-user-id=user.id)
+            if isFollowing
+              i.fa-solid.fa-user-minus.me-2
+              | Dejar de seguir
+            else
+              i.fa-solid.fa-user-plus.me-2
+              | Seguir

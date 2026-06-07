@@ -1,0 +1,64 @@
+extends ../layouts/main.pug
+include ../mixin/feedbackModal.pug
+
+block metadata 
+  
+block content 
+  if error
+    +feedbackModal(
+      "error",
+      "Error en el registro!!!.",
+      error,
+      "Aceptar"
+    )
+  .container.py-5
+    .row.justify-content-center
+      .col-md-10.col-lg-8.col-xl-7
+        .card.border-0.shadow-lg.rounded-4.overflow-hidden
+          .card-body.p-4.p-sm-5
+            .text-center.mb-4
+              div.d-inline-flex.align-items-center.justify-content-center.bg-primary-subtle.text-primary.rounded-circle.mb-3(style="width: 60px; height: 60px;")
+                i.fa-solid.fa-user-plus.fs-3
+              h2.fw-bold.text-dark Únete a FOTAZA 2
+              p.text-secondary Crea tu cuenta y comparte tus mejores momentos
+              
+            form(action="/auth/register" method="POST")
+              .row.g-3
+                .col-md-6
+                  .form-floating
+                    input#firstname.form-control.rounded-3(type="text" name="firstName" placeholder="Nombre" required)
+                    label(for="firstname") Nombre
+                .col-md-6
+                  .form-floating
+                    input#lastname.form-control.rounded-3(type="text" name="lastName" placeholder="Apellido" required)
+                    label(for="lastname") Apellido
+                    
+                .col-md-6
+                  .form-floating
+                    input#dni.form-control.rounded-3(type="text" name="dni" placeholder="DNI" required)
+                    label(for="dni") DNI
+                .col-md-6
+                  .form-floating
+                    input#birthdate.form-control.rounded-3(type="date" name="birthdate" placeholder="Fecha" required onkeydown="return false")
+                    label(for="birthdate") Fecha de Nacimiento
+                    
+                .col-12
+                  .form-floating
+                    input#nickname.form-control.rounded-3(type="text" name="nickname" placeholder="Nickname" required)
+                    label(for="nickname") Nickname (@tu_nombre)
+                    
+                .col-12
+                  .form-floating
+                    input#email.form-control.rounded-3(type="email" name="email" placeholder="Email" required)
+                    label(for="email") Correo Electrónico
+                    
+                .col-12
+                  .form-floating
+                    input#password.form-control.rounded-3(type="password" name="password" placeholder="Contraseña" required autocomplete="new-password")
+                    label(for="password") Contraseña
+                    
+              button.btn.btn-primary.w-100.py-3.rounded-3.fw-bold.text-uppercase.shadow-sm.mt-4(type="submit") Crear Cuenta
+              
+          .card-footer.bg-light.border-0.text-center.py-3
+            p.mb-0.text-secondary ¿Ya tienes una cuenta? 
+              a.text-primary.fw-bold.text-decoration-none(href="/auth/login") Inicia sesión

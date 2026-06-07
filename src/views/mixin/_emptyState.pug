@@ -1,0 +1,7 @@
+mixin emptyState(icon, title, message, cardStyle = false)
+  - const containerClass = cardStyle ? 'text-center py-5 bg-white rounded-4 border border-secondary-subtle shadow-sm' : 'text-center py-5'
+  div(class=containerClass)
+    i(class=`fa-solid fa-${icon} text-secondary mb-3` style="font-size: 3rem; opacity: 0.5;")
+    if title
+      h5.text-dark.fw-medium= title
+    p.text-secondary= message

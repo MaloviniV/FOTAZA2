@@ -1,0 +1,43 @@
+extends ../layouts/main.pug
+include ../mixin/feedbackModal.pug
+
+block metadata 
+
+block content 
+  if email&&name
+    +feedbackModal(
+      "success",
+      "Registro Exitoso!!!.",
+      `¡¡BIENVENIDO ${name}!!`,
+      "Aceptar"
+    )
+  .container.py-5
+    .row.justify-content-center
+      .col-md-8.col-lg-5
+        .card.border-0.shadow-lg.rounded-4.overflow-hidden
+          .card-body.p-4.p-sm-5
+            .text-center.mb-4
+              div.d-inline-flex.align-items-center.justify-content-center.bg-primary-subtle.text-primary.rounded-circle.mb-3(style="width: 60px; height: 60px;")
+                i.fa-solid.fa-user.fs-3
+              h2.fw-bold.text-dark Iniciar Sesión
+              p.text-secondary Ingresa tus credenciales para continuar
+            
+            form(action="/auth/login" method="POST")
+              .form-floating.mb-3
+                input#email.form-control.rounded-3(type="email" name="email" placeholder="name@example.com" value=email required)
+                label(for="email") Correo Electrónico
+              
+              .form-floating.mb-4
+                input#password.form-control.rounded-3(type="password" name="password" placeholder="Contraseña" required autocomplete="new-password")
+                label(for="password") Contraseña
+                
+              button.btn.btn-primary.w-100.py-3.rounded-3.fw-bold.text-uppercase.shadow-sm(type="submit") Ingresar
+            
+            if error
+              .alert.alert-danger.mt-4.d-flex.align-items-center.rounded-3(role="alert")
+                i.fa-solid.fa-triangle-exclamation.me-2
+                div= error
+
+          .card-footer.bg-light.border-0.text-center.py-3
+            p.mb-0.text-secondary ¿No tienes cuenta? 
+              a.text-primary.fw-bold.text-decoration-none(href="/auth/register") Regístrate aquí

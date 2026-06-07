@@ -1,0 +1,38 @@
+header.sticky-top.bg-white.shadow-sm
+  nav.navbar.navbar-expand-lg.navbar-light.py-3
+    .container
+      //- LOGO
+      a#navbar-logo-link.navbar-brand.fw-bold.fs-3.text-primary(href="/") FOTAZA 2
+      
+      //- BOTON HAMBURGUESA RESPONSIVO
+      button.navbar-toggler.border-0(type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation")
+        span.navbar-toggler-icon
+        
+      //- NAVBAR
+      .collapse.navbar-collapse#navbarContent
+        //- BUSCADOR
+        form#navbar-search-form.d-flex.mx-auto.my-3.my-lg-0(style="max-width: 500px; width: 100%;")
+          .input-group
+            input#navbar-search-input.form-control.rounded-start-pill.px-4.border-primary-subtle(type="search" placeholder="Buscar etiquetas, usuarios, tags..." aria-label="Buscar")
+            button#navbar-search-btn.btn.btn-primary.rounded-end-pill.px-3(type="submit" title="Buscar") 
+              i.fa-solid.fa-magnifying-glass
+
+        //- MENU DE NAVEGACION
+        ul.navbar-nav.ms-auto.align-items-center.gap-2
+          if currentUser 
+            //-VISTA USUARIO AUTENTICADO
+            li.nav-item.me-2.mb-2.mb-lg-0: a.btn.btn-outline-primary.rounded-pill.px-4.fw-bold(href="/") Explorar
+            li.nav-item.me-2.mb-2.mb-lg-0: a.btn.btn-primary.rounded-pill.px-4.fw-bold.shadow-sm(href="/post/formPost") Subir Imagen
+            li.nav-item.me-2.mb-2.mb-lg-0: button#notifications-btn.btn.btn-light.rounded-circle.border.border-secondary-subtle.d-flex.align-items-center.justify-content-center(title="Notificaciones" style="width: 40px; height: 40px; padding: 0;") 🔔
+            li.nav-item.dropdown
+              a#userDropdown.nav-link.dropdown-toggle.d-flex.align-items-center.p-0.ms-2(href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false")
+                img.rounded-circle.object-fit-cover.border.border-2(src=(currentUser.avatarUrl || '/imagenes/avatar/default-avatar.png') alt="Mi Perfil" width="40" height="40")
+              ul.dropdown-menu.dropdown-menu-end.shadow.mt-2
+                li: a.dropdown-item.py-2(href="/dashboard") Mi Perfil
+                li: a.dropdown-item.py-2(href="/dashboard/accountConfig") Configuración
+                li: hr.dropdown-divider
+                li: a.dropdown-item.py-2.text-danger(href="/auth/logout") Cerrar Sesión
+          else
+            //-VISTA USUARIO INVITADO
+            li.nav-item.me-2.mb-2.mb-lg-0: a#nav-login-btn.btn.btn-outline-primary.rounded-pill.px-4.fw-bold(href="/auth/login") Iniciar Sesión
+            li.nav-item: a#nav-register-btn.btn.btn-outline-primary.rounded-pill.px-4.fw-bold(href="/auth/register") Registrarse

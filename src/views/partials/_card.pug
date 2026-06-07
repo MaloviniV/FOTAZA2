@@ -1,36 +1,39 @@
-if files  
+if files && files.length > 0
   each file in files
-    .card(data-file-id=file.id)
-      a.card-link(href=currentUser ? `/post/${file.idPost}/file/${file.id}` : '/auth/login')
+    .card.border-0.shadow-sm.rounded-4.overflow-hidden.hover-zoom.bg-dark(data-file-id=file.id)
+      //- IMAGEN ARCHIVO
+      a.position-relative.d-block.text-decoration-none(href=currentUser ? `/post/${file.idPost}/file/${file.id}` : '/auth/login')
         if file.mimetype && file.mimetype.startsWith('video/')
-          video.card-media(src=file.path autoplay muted loop playsinline oncontextmenu=file.textCopyright ? "return false;" : null)
+          video.card-img-top.w-100.object-fit-cover(src=file.path autoplay muted loop playsinline oncontextmenu=file.textCopyright ? "return false;" : null)
         else
-          img.card-media(src=file.path alt=file.title || "Archivo" loading="lazy" oncontextmenu=file.textCopyright ? "return false;" : null draggable=file.textCopyright ? "false" : "true")
+          img.card-img-top.w-100.object-fit-cover(src=file.path alt=file.title || "Archivo" loading="lazy" oncontextmenu=file.textCopyright ? "return false;" : null draggable=file.textCopyright ? "false" : "true")
         
         if file.textCopyright
-          .copyright-badge(title=file.textCopyright)
+          .position-absolute.bottom-0.end-0.m-2.badge.bg-dark.bg-opacity-75.rounded-pill.p-2.shadow-sm(title=file.textCopyright)
             i.fa-solid.fa-copyright
 
-      //- HOVER
-      .card-overlay
-        .card-actions
+      //- OVERLAY HOVER
+      .card-img-overlay.d-flex.flex-column.justify-content-between.p-3.card-hover-overlay(style="pointer-events: none;")
+        .d-flex.justify-content-end.gap-2(style="pointer-events: auto;")
           if currentUser
-            button.action-btn.add-to-collection(title="Añadir a colección")
-              i.fa-solid.fa-bookmark
-            button.action-btn.get-now-btn(title="Obtener ahora") Obtener ahora
+            button.btn.btn-light.bg-opacity-75.rounded-circle.d-flex.align-items-center.justify-content-center.add-to-collection(title="Añadir a colección" style="width: 32px; height: 32px;")
+              i.fa-solid.fa-bookmark.text-dark
+            button.btn.btn-danger.rounded-pill.fw-semibold.btn-sm.px-3.get-now-btn(title="Obtener ahora") Obtener ahora
           else
-            a.action-btn.add-to-collection(href="/auth/login" title="Inicia sesión para añadir a colección" style="color: inherit;")
-              i.fa-solid.fa-bookmark
-            a.action-btn.get-now-btn(href="/auth/login" title="Inicia sesión para obtener" style="color: inherit;") Obtener ahora
+            a.btn.btn-light.bg-opacity-75.rounded-circle.d-flex.align-items-center.justify-content-center.add-to-collection(href="/auth/login" title="Inicia sesión para añadir a colección" style="width: 32px; height: 32px;")
+              i.fa-solid.fa-bookmark.text-dark
+            a.btn.btn-danger.rounded-pill.fw-semibold.btn-sm.px-3.d-inline-flex.align-items-center.get-now-btn(href="/auth/login" title="Inicia sesión para obtener") Obtener ahora
 
         - const userId = (file.Post && file.Post.User && file.Post.User.id) ? file.Post.User.id : ''
         - const profileUrl = currentUser && userId ? `/user/${userId}` : '/auth/login'
-        a.card-user(href=profileUrl )
-          - const avatar = (file.Post && file.Post.User && file.Post.User.avatarUrl) ? file.Post.User.avatarUrl : 'https://ui-avatars.com/api/?name=User&background=random'
-          - const userName = (file.Post && file.Post.User && file.Post.User.nickname) ? file.Post.User.nickname : 'Usuario Desconocido'
-          
-          img.user-avatar(src=avatar alt=`Avatar de ${userName}`)
-          span.user-name= userName
+        div(style="pointer-events: auto; width: max-content;")
+          a.d-inline-flex.align-items-center.gap-2.text-white.text-decoration-none.card-user(href=profileUrl)
+            - const avatar = (file.Post && file.Post.User && file.Post.User.avatarUrl) ? file.Post.User.avatarUrl : 'https://ui-avatars.com/api/?name=User&background=random'
+            - const userName = (file.Post && file.Post.User && file.Post.User.nickname) ? file.Post.User.nickname : 'Usuario Desconocido'
+            
+            img.rounded-circle.object-fit-cover.border.border-2.border-white(src=avatar alt=`Avatar de ${userName}` width="35" height="35")
+            span.fw-semibold.text-shadow= userName
 
 else 
-  p NO HAY MAS ARCHIVOS
+  .col-12.text-center.py-5
+    p.text-muted.mb-0 No hay archivos para mostrar en este momento.

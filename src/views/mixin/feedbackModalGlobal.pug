@@ -1,224 +1,77 @@
-//- /**
-    * Muestra un modal de feedback en la aplicación.
-    *
-    * @param {string} type - Tipo de modal (success, error, warning).
-    * @param {string} title - Título del modal.
-    * @param {string} message - Mensaje a mostrar dentro del modal.
-    * @param {string|null} [redirectUrl=null] - URL opcional para redirigir al usuario.
-    * @returns {void}
-    */
 mixin feedbackModalGlobal(type, title, message, primaryBtnText, primaryBtnLink, secondaryBtnText, secondaryBtnLink)
-  dialog#modal-global
-    .modal-overlay(class=`modal-${type}`)
-      .modal-box
-        .modal-icon
-          if type === "error"
-            span.icon-error ❌
-          else if type === "success"
-            span.icon-success ✅
-          else 
-            span.icon-info ℹ️
-            
-        h3.modal-title= title
-        p.modal-message= message
-        
-        .modal-buttons
-          //- Boton Primario
-          if primaryBtnText
-            if primaryBtnLink
-              a.action-btn.primary(href=primaryBtnLink)= primaryBtnText
-            else
-              button.action-btn.primary(type="button" onclick="document.getElementById(`modal-global`).close()")= primaryBtnText
-          
-          //- Boton Secundario (opcional)
-          if secondaryBtnText
-            if secondaryBtnLink
-              a.action-btn.secondary(href=secondaryBtnLink)= secondaryBtnText
-            else
-              button.action-btn.secondary(type="button" onclick="document.getElementById(`modal-global`).close()")= secondaryBtnText
+  .modal.fade#globalFeedbackModal(tabindex="-1", aria-labelledby="globalFeedbackModalLabel", aria-hidden="true")
+    .modal-dialog.modal-dialog-centered
+      .modal-content.rounded-4.shadow-lg.border-0
+        .modal-body.p-4.text-center
+          i#globalModalIcon.mb-3(style="font-size: 3.5rem;")
+          h4.modal-title.fw-bold.mb-2#globalFeedbackModalLabel
+          p.text-secondary.mb-4#globalModalMessage
+          .d-flex.justify-content-center.gap-2
+            a.btn.btn-lg.btn-light.rounded-pill.px-4.d-none#globalModalSecondaryBtn(href="#")
+            a.btn.btn-lg.btn-primary.rounded-pill.px-4.d-none#globalModalPrimaryBtn(href="#")
 
-  //- ESTILO (CSS)
-  global-js-modal
-  style. 
-    dialog#modal-global {
-      border: none;
-      background: transparent;
-      padding: 0;
-      margin: auto;
-      width: 100%;
-      max-width: 100%;
-    }
-
-    dialog#modal-global::backdrop {
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      animation: backdropFadeIn 0.3s ease-out forwards;
-    }
-
-    @keyframes backdropFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .modal-overlay {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100%;
-      padding: 1rem;
-      animation: modalFadeIn 0.3s ease-out forwards;
-    }
-
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .modal-box {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      width: 400px;
-      max-width: 90vw;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-
-    .modal-icon span {
-      font-size: 3rem;
-      display: block;
-      margin-bottom: 1rem;
-    }
-
-    .modal-title {
-      margin: 0 0 0.5rem 0;
-      color: #1e293b;
-    }
-
-    .modal-message {
-      color: #64748b;
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .action-btn,
-    .action-btn:link,
-    .action-btn:visited {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 120px;
-      padding: 0.9rem 1.3rem;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      font-size: 0.95rem;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    }
-
-    .action-btn.primary {
-      background-color: #3182ce;
-      color: #ffffff;
-      box-shadow: 0 6px 18px rgba(49, 130, 206, 0.18);
-    }
-
-    .action-btn.primary:hover {
-      background-color: #2563eb;
-    }
-
-    .action-btn.secondary {
-      background-color: #f1f5f9;
-      color: #334155;
-      border-color: #cbd5e1;
-    }
-
-    .action-btn.secondary:hover {
-      background-color: #e2e8f0;
-    }
-
-    .action-btn:active {
-      transform: translateY(1px);
-      box-shadow: none;
-    }
-
-  //- SCRIPT JS
   script.
     if (typeof window.showGlobalModal === "undefined") {
-      window.showGlobalModal = function(type, title, message, primaryBtnText = null, primaryBtnLink = null, secondaryBtnText = null, secondaryBtnLink = null) {
-        const modalContainer = document.getElementById("modal-global");
-        
-        if (!modalContainer) {
-          console.error("No se encontró el modal global.");
-          return;
+      let globalModalInstance = null;
+      document.addEventListener('DOMContentLoaded', () => {
+        const modalEl = document.getElementById('globalFeedbackModal');
+        if (modalEl) {
+          globalModalInstance = new bootstrap.Modal(modalEl); //le dice a bootstrap que es un modal
         }
-        
-        const overlay = modalContainer.querySelector(".modal-overlay");
-        const titleEl = modalContainer.querySelector(".modal-title");
-        const messageEl = modalContainer.querySelector(".modal-message");
-        const iconContainer = modalContainer.querySelector(".modal-icon");
-        const buttonsContainer = modalContainer.querySelector(".modal-buttons");
-        
-        if (titleEl) titleEl.textContent = title;
-        if (messageEl) messageEl.textContent = message;
-        if (overlay) overlay.className = `modal-overlay modal-${type}`;
-        if (iconContainer) iconContainer.innerHTML = type === "error" ? `<span class="icon-error">❌</span>` : (type === "success" ? `<span class="icon-success">✅</span>` : `<span class="icon-info">ℹ️</span>`);
-        
-        // Limpiar botones previos
-        if (buttonsContainer) buttonsContainer.innerHTML = "";
-        
-        // Agregar boton primario
-        if (primaryBtnText && buttonsContainer) {
-          const primaryBtn = document.createElement("button");
-          primaryBtn.className = "action-btn primary";
-          primaryBtn.textContent = primaryBtnText;
-          primaryBtn.type = "button";
-          primaryBtn.onclick = async (e) => {
-            e.preventDefault();
-            if (primaryBtnLink) {
-              if (typeof primaryBtnLink === "function") {
-                await primaryBtnLink();
-                modalContainer.close();
-              }else{
-                window.location.href = primaryBtnLink;
-              }
-            } else {
-              modalContainer.close();
-            }
-          };
-          buttonsContainer.appendChild(primaryBtn);
-        }
-        
-        // Agregar boton secundario
-        if (secondaryBtnText && buttonsContainer) {
-          const secondaryBtn = document.createElement("button");
-          secondaryBtn.className = "action-btn secondary";
-          secondaryBtn.textContent = secondaryBtnText;
-          secondaryBtn.type = "button";
-          secondaryBtn.onclick = (e) => {
-            e.preventDefault();
-            if (secondaryBtnLink) {
-              window.location.href = secondaryBtnLink;
-            } else {
-              modalContainer.close();
-            }
-          };
-          buttonsContainer.appendChild(secondaryBtn);
-        }
-        
-        modalContainer.showModal();
-      };
-
-      document.addEventListener("click", function(e) {
-        const modal = document.getElementById("modal-global");
-        if (!modal || !modal.open) return;
-        if (e.target === modal) modal.close();
       });
+
+      window.showGlobalModal = function(type, title, message, primaryBtnText, primaryBtnLink, secondaryBtnText, secondaryBtnLink) {
+        if (!globalModalInstance) return;
+
+        const iconEl = document.getElementById('globalModalIcon');
+        const titleEl = document.getElementById('globalFeedbackModalLabel');
+        const messageEl = document.getElementById('globalModalMessage');
+        const primaryBtn = document.getElementById('globalModalPrimaryBtn');
+        const secondaryBtn = document.getElementById('globalModalSecondaryBtn');
+
+        // ICONO, TITULO, MENSAJE
+        iconEl.className = `fa-solid fa-circle-${type === 'error' ? 'xmark text-danger' : (type === 'success' ? 'check text-success' : 'info text-info')} mb-3`;
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+
+        // BOTON PRIMARIO
+        if (primaryBtnText) {
+          primaryBtn.textContent = primaryBtnText;
+          primaryBtn.classList.remove('d-none');
+          primaryBtn.onclick = (e) => {
+            if (primaryBtnLink) {
+              e.preventDefault();
+              window.location.href = primaryBtnLink;
+            }
+          };
+          if (!primaryBtnLink) {
+            primaryBtn.setAttribute('data-bs-dismiss', 'modal');
+          } else {
+            primaryBtn.removeAttribute('data-bs-dismiss');
+          }
+        } else {
+          primaryBtn.classList.add('d-none');
+        }
+
+        // BOTON SECUNDARIO
+        if (secondaryBtnText) {
+          secondaryBtn.textContent = secondaryBtnText;
+          secondaryBtn.classList.remove('d-none');
+          secondaryBtn.onclick = (e) => {
+            if (secondaryBtnLink) {
+              e.preventDefault();
+              window.location.href = secondaryBtnLink;
+            }
+          };
+          if (!secondaryBtnLink) {
+            secondaryBtn.setAttribute('data-bs-dismiss', 'modal');
+          } else {
+            secondaryBtn.removeAttribute('data-bs-dismiss');
+          }
+        } else {
+          secondaryBtn.classList.add('d-none');
+        }
+
+        globalModalInstance.show();
+      };
     }

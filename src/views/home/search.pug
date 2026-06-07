@@ -1,88 +1,41 @@
-extends ../layout.pug
+extends ../layouts/main.pug
+include ../mixin/_emptyState.pug
 
 block metadata
-  link(rel="stylesheet", href="/css/_cardStyle.css")
-  style.
-    .search-page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
-    }
-    .search-header {
-      margin-bottom: 2rem;
-    }
-    .search-filters {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      background: #f8fafc;
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      flex-wrap: wrap;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-width: 200px;
-      flex: 1;
-    }
-    .filter-group label {
-      font-weight: 600;
-      color: #334155;
-    }
-    .filter-group select, .filter-group input {
-      padding: 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 1rem;
-    }
-    .btn-search {
-      padding: 0.75rem 1.5rem;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      align-self: flex-end;
-      height: 45px;
-    }
 
 block content
-  .search-page
-    .search-header
-      h1 Buscar Fotografías
+  .container.py-5
+    .mb-4
+      h1.fw-bold.text-dark Buscar Fotografías
       if q
-        p Resultados para: <strong>"#{q}"</strong>
+        p.text-secondary Resultados para: #[strong.text-dark "#{q}"]
 
-    form.search-filters(action="/search" method="GET")
-      .filter-group
-        label(for="q") Término de búsqueda
-        input#q(type="text" name="q" value=q placeholder="Título, descripción...")
-      
-      .filter-group
-        label(for="tag") Etiqueta
-        select#tag(name="tag")
-          option(value="") Todas
-          if listTags
-            each t in listTags
-              option(value=t selected=(tag === t))= t
+    form.bg-white.border.border-secondary-subtle.p-4.rounded-4.shadow-sm.mb-5(action="/search" method="GET")
+      .row.g-3.align-items-end
+        .col-md-4
+          label.form-label.fw-medium.text-secondary.small.mb-1(for="q") Término de búsqueda
+          input#q.form-control.rounded-3(type="text" name="q" value=q placeholder="Título, descripción...")
+        
+        .col-md-3
+          label.form-label.fw-medium.text-secondary.small.mb-1(for="tag") Etiqueta
+          select#tag.form-select.rounded-3(name="tag")
+            option(value="") Todas
+            if listTags
+              each t in listTags
+                option(value=t selected=(tag === t))= t
 
-      .filter-group
-        label(for="type") Tipo de archivo
-        select#type(name="type")
-          option(value="") Todos
-          option(value="image" selected=(type === "image")) Imágenes
-          option(value="video" selected=(type === "video")) Videos
+        .col-md-3
+          label.form-label.fw-medium.text-secondary.small.mb-1(for="type") Tipo de archivo
+          select#type.form-select.rounded-3(name="type")
+            option(value="") Todos
+            option(value="image" selected=(type === "image")) Imágenes
+            option(value="video" selected=(type === "video")) Videos
 
-      button.btn-search(type="submit") Aplicar Filtros
+        .col-md-2
+          button.btn.btn-primary.w-100.rounded-3.fw-bold.py-2(type="submit") Aplicar Filtros
 
     if files && files.length > 0
-      .grid-container(style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;")
+      .photo-grid
         include ../partials/_card.pug
     else
-      .empty-state(style="text-align: center; padding: 4rem 0; color: #64748b;")
-        i.fa-solid.fa-magnifying-glass(style="font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1;")
-        p No se encontraron resultados que coincidan con tu búsqueda.
+      +emptyState('magnifying-glass', 'Sin resultados', 'No se encontraron resultados que coincidan con tu búsqueda.')

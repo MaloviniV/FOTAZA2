@@ -1,0 +1,49 @@
+.logo-font {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: -1.5px;
+  text-transform: uppercase;
+}
+
+.logo-font span {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* TARJETAS */
+.hover-zoom {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.hover-zoom:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* OVERLAY PARA HOVER DE ARCHIVOS */
+.card-hover-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.hover-zoom:hover .card-hover-overlay {
+  opacity: 1;
+}
+
+.text-shadow {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* GRILLA DE ARCHIVOS */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}

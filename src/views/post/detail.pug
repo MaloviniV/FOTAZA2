@@ -1,0 +1,78 @@
+extends ../layouts/main.pug
+include ../mixin/feedbackModal.pug
+
+block metadata
+  script(src="/js/postDetailJS.js" type="module" defer)
+
+block content
+  if error
+    +feedbackModal(
+      "error",
+      "¡Error al mostrar el Archivo!",
+      error,
+      "Ver Posts",
+      "/dashboard/posts"
+    )
+
+  if post
+    .container.py-5
+      //- ENCABEZADO DEL POST
+      .card.border-0.shadow-sm.rounded-4.mb-5.bg-white
+        .card-body.p-4.p-md-5
+          .d-flex.flex-column.flex-md-row.justify-content-between.align-items-start.align-items-md-center.gap-4
+            .post-info
+              h1.fw-bold.text-dark.mb-2= post.title
+              if post.description
+                p.text-secondary.fs-5.mb-3= post.description
+              
+              .d-flex.flex-wrap.gap-3.text-secondary.small
+                span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill
+                  i.fa-solid.fa-tags.me-2
+                  | #{Array.isArray(post.selectedTags) ? post.selectedTags.join(', ') : post.selectedTags || "Sin etiquetas"}
+                span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill
+                  i.fa-solid.fa-comments.me-2
+                  | #{post.openComments ? "Comentarios Abiertos" : "Comentarios Cerrados"}
+            
+            .post-actions.d-flex.flex-wrap.gap-2
+              a.btn.btn-outline-secondary.rounded-pill.px-4.fw-medium(href="/dashboard/posts") 
+                i.fa-solid.fa-arrow-left.me-2
+                | Volver
+              a.btn.btn-outline-primary.rounded-pill.px-4.fw-medium(href=`/post/showFormPost?postId=${post.id}`) Editar
+              button.btn.btn-outline-danger.rounded-pill.px-4.fw-medium#deletePost-btn(type="button" data-post-id=post.id) Borrar
+              a.btn.btn-primary.rounded-pill.px-4.fw-bold.shadow-sm(href=`/post/${post.id}/file/?titlePost=${encodeURIComponent(post.title)}`) 
+                i.fa-solid.fa-plus.me-2
+                | Agregar Imagen
+
+      //- IMAGENES DEL ALBUM
+      .mb-5
+        h3.fw-bold.text-dark.mb-4 Imágenes del álbum
+        if post.Files && post.Files.length > 0
+          .row.g-4
+            each file in post.Files
+              .col-md-6.col-lg-4
+                .card.h-100.border-0.shadow-sm.rounded-4.overflow-hidden.hover-zoom
+                  a.position-absolute.w-100.h-100(href=`/post/${post.id}/file/${file.id}` style="z-index: 1;")
+                  
+                  .ratio.ratio-4x3
+                    img.object-fit-cover(src=file.path alt=file.title || "Imagen del post" loading="lazy")
+                  
+                  .card-body.position-relative(style="z-index: 2;")
+                    h5.fw-bold.text-dark.mb-1= file.title || 'Sin título'
+                    if file.description
+                      p.text-secondary.small.mb-3= file.description
+                    
+                    .mb-3
+                      span.badge.bg-primary-subtle.text-primary.rounded-pill Etiquetas: #{file.selectedTags || 'Sin etiquetas'}
+                    
+                    //- MOSTRAR SI ES EL CREADOR
+                    if currentUser && currentUser.id === post.idUser
+                      button.btn.btn-outline-danger.btn-sm.rounded-pill.w-100.fw-medium.btn-delete-file(type="button" data-post-id=post.id data-file-id=file.id) Borrar imagen
+        else
+          .text-center.py-5.bg-white.rounded-4.border.border-secondary-subtle
+            i.fa-solid.fa-images.text-secondary.mb-3(style="font-size: 3rem; opacity: 0.5;")
+            h5.text-dark.fw-medium No hay imágenes cargadas en este álbum
+            p.text-secondary Sube la primera imagen para empezar a darle vida.
+
+  else
+    .container.py-5
+      .alert.alert-warning.text-center.rounded-4 No se encontró el post solicitado.

@@ -49,7 +49,6 @@ Post.init(
     modelName: "Post",
     tableName: "posts",
     timestamps: true,
-    paranoid: true,
     indexes: [
       {
         unique: true,

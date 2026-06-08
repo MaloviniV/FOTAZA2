@@ -55,6 +55,8 @@ Post.belongsTo(User, {
 Post.hasMany(File, {
   foreignKey: "idPost",
   sourceKey: "id",
+  onDelete: "CASCADE",
+  hooks: true,
 });
 
 File.belongsTo(Post, {
@@ -66,6 +68,8 @@ File.belongsTo(Post, {
 File.hasMany(Rating, {
   foreignKey: "idFile",
   sourceKey: "id",
+  onDelete: "CASCADE",
+  hooks: true,
 });
 
 Rating.belongsTo(File, {
@@ -98,6 +102,8 @@ Comment.belongsTo(User, {
 File.hasMany(Comment, {
   foreignKey: "idFile",
   sourceKey: "id",
+  onDelete: "CASCADE",
+  hooks: true,
 });
 
 Comment.belongsTo(File, {

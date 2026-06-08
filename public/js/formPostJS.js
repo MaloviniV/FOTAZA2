@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const form  = document.getElementById("form_post");
+  const form = document.getElementById("form_post");
   const postIdInput = form?.querySelector("#postId-input");
   const submitBtn = form?.querySelector("button[type='submit']");
   const cancelBtn = document.getElementById("cancel_btn");
@@ -10,52 +10,80 @@ document.addEventListener("DOMContentLoaded", async () => {
   //EVENTO SUBMIT
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+
     //AGREGAR VALIDACIONES DE LOS CAMPOS
 
     submitBtn.disabled = true;
-    
+
     try {
       const datos = {
-      titlePost: form.title?.value,
+        title: form.title?.value,
         description: form.description?.value,
-        selectedTags: Array.from(form.selectedTags?.selectedOptions || []).map(opt => opt.value),
-        openComments: form.openComments?.checked
+        selectedTags: Array.from(form.selectedTags?.selectedOptions || []).map(
+          (opt) => opt.value,
+        ),
+        openComments: form.openComments?.checked,
       };
-      
-      if (postId) {          //MODIFICAR ALBUM (PUT)
+
+      if (postId) {
+        //MODIFICAR ALBUM (PUT)
         const response = await fetch(`/post/${postId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(datos)
+          body: JSON.stringify(datos),
         });
-        
+
         const result = await response.json();
-        
-        if(!response.ok) throw new Error(result.error || "No se pudo modificar el Album");
-        
-        window.showGlobalModal("success", "¡Exito!", "¡Modificacion del album exitosa!", "Ir al Album", `/post/${postId}`);
-      } else {          //CREAR ALBUM (POST)
-        const response = await fetch('/post', {
+
+        if (!response.ok)
+          throw new Error(result.error || "No se pudo modificar el Album");
+
+        window.showGlobalModal(
+          "success",
+          "¡Exito!",
+          "¡Modificacion del album exitosa!",
+          "Ir al Album",
+          `/post/${postId}`,
+        );
+      } else {
+        //CREAR ALBUM (POST)
+        const response = await fetch("/post", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(datos)
+          body: JSON.stringify(datos),
         });
 
         const result = await response.json();
 
-        if(!response.ok) throw new Error(result.error || "¡No se pudo crear el Album!");
-        
-        window.showGlobalModal("success", "¡Exito!", "¡Creación del album exitosa!", "Ir al Album", `/post/${result.postId}`, "Subir Archivo", `/post/${result.postId}/file?titlePost=${datos.titlePost}`);
-      }        
+        if (!response.ok)
+          throw new Error(result.error || "¡No se pudo crear el Album!");
+
+        window.showGlobalModal(
+          "success",
+          "¡Exito!",
+          "¡Creación del album exitosa!",
+          "Ir al Album",
+          `/post/${result.postId}`,
+          "Subir Archivo",
+          `/post/${result.postId}/file?titlePost=${datos.title}`,
+        );
+      }
     } catch (error) {
       console.error("❌ Error al crear/modifiicar el Album:" + error);
 
       submitBtn.disabled = false;
-      window.showGlobalModal("error", "¡Error!", error.message, "Reintentar", null, "Cancelar", `dashboard/posts/`);
+      window.showGlobalModal(
+        "error",
+        "¡Error!",
+        error.message,
+        "Reintentar",
+        null,
+        "Cancelar",
+        `dashboard/posts/`,
+      );
     }
   });
-  
+
   //EVENTO BOTON CANCELAR
   if (cancelBtn) {
     cancelBtn.addEventListener("click", () => {
@@ -66,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
-    
+
   //Manejo de los tags mediante Slim Select
   if (tagsSelect) {
     try {
@@ -78,8 +106,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           searchPlaceholder: "Buscar...",
         },
       });
-  } catch (error) {
-    console.error("Error al inicializar Slim Select:", error);
-  }
+    } catch (error) {
+      console.error("Error al inicializar Slim Select:", error);
+    }
   }
 });

@@ -1,6 +1,9 @@
 import Post from "../models/Post.js";
 import File from "../models/File.js";
 import { LIST_TAGS } from "../utils/constants.js";
+import { sequelize } from "../config/db.js";
+import { del } from "@vercel/blob";
+import { serviceBlob } from "../config/config.js";
 
 //MOSTRAR EL FORMULARIO DE POST PARA CREAR/EDITAR (LISTO)
 export const showFormPost = async (req, res) => {
@@ -17,36 +20,34 @@ export const showFormPost = async (req, res) => {
           .json({ success: false, error: "No se encontro el Album" });
       }
 
-      post = response.toJSON({success: true, message: "Album recuperado"});
+      post = response.toJSON();
     } catch (error) {
       console.error("Error al recuperar el Album en la BD", error);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          error: "Ocurrio un error al intentar recuperar los datos del Album"
-        })
+      return res.status(500).json({
+        success: false,
+        error: "Ocurrio un error al intentar recuperar los datos del Album",
+      });
     }
   }
 
-  res.render("post/formPost.pug", { listTags: LIST_TAGS, ...post });
+  res.render("post/form.pug", { listTags: LIST_TAGS, ...post });
 };
 
 //CREO EL ALBUM EN LA BD (listo)
 export const createPost = async (req, res) => {
   const userId = req.user.id;
 
-  const { titlePost, description, selectedTags, openComments } = req.body;
+  const { title, description, selectedTags, openComments } = req.body;
 
   try {
     const [post, created] = await Post.findOrCreate({
       where: {
         idUser: userId,
-        title: titlePost,
+        title: title,
       },
       defaults: {
         idUser: userId,
-        title: titlePost,
+        title: title,
         description,
         selectedTags,
         openComments,
@@ -59,16 +60,14 @@ export const createPost = async (req, res) => {
         .json({ success: false, error: "Ya tienes un Album con ese nombre" });
     }
 
-    res.json({ success: true, message:"Album creado", postId: post.id });
+    res.json({ success: true, message: "Album creado", postId: post.id });
   } catch (error) {
     console.error("❌ Error al intentar crear post en BD:", error);
 
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Ocurrio un error interno al intentar crear el Post",
-      });
+    res.status(500).json({
+      success: false,
+      error: "Ocurrio un error interno al intentar crear el Post",
+    });
   }
 };
 
@@ -83,18 +82,16 @@ export const showPost = async (req, res) => {
     });
 
     if (!response) {
-      return res
-        .status(404)
-        .render("post/postDetail.pug", {
-          error: "No se encontro el album solicitado",
-        });
+      return res.status(404).render("post/detail.pug", {
+        error: "No se encontro el album solicitado",
+      });
     }
 
     const post = response.toJSON();
-    res.render("post/postDetail.pug", { post });
+    res.render("post/detail.pug", { post });
   } catch (error) {
     console.error("❌ Error al cargar el album: " + error);
-    res.render("post/postDetail.pug", {
+    res.render("post/detail.pug", {
       error: error.message || "Error al intentar cargar el album",
     });
   }
@@ -102,24 +99,22 @@ export const showPost = async (req, res) => {
 
 //MODIFICAR EL ALBUM EN LA BD (listo)
 export const updatePost = async (req, res) => {
-  let { titlePost, description, selectedTags, openComments } = req.body;
+  let { title, description, selectedTags, openComments } = req.body;
   const postId = req.params.postId;
 
   try {
     if (!selectedTags) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Debe seleccionar al menos una etiqueta (TAG).",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "Debe seleccionar al menos una etiqueta (TAG).",
+      });
     } else if (!Array.isArray(selectedTags)) {
       selectedTags = [selectedTags];
     }
 
     const [rowsUpdated] = await Post.update(
       {
-        title: titlePost,
+        title: title,
         description,
         selectedTags,
         openComments,
@@ -130,47 +125,62 @@ export const updatePost = async (req, res) => {
     );
 
     if (rowsUpdated === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          error: "No se encontro el album a actualizar",
-        });
+      return res.status(404).json({
+        success: false,
+        error: "No se encontro el album a actualizar",
+      });
     }
 
     res.json({ success: true, postId });
   } catch (error) {
     console.error("❌ Error al intentar actualizar el post en la BD:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Ocurrio un error al intentar actualizar el Album (post)",
-      });
+    res.status(500).json({
+      success: false,
+      error: "Ocurrio un error al intentar actualizar el Album (post)",
+    });
   }
 };
 
 //DELETE EL ALBUM EN LA BD (listo)
 export const deletePost = async (req, res) => {
   const postId = req.params.postId;
-  console.log("❌ postId");
-  try {
-    const deleteRow = await Post.destroy({ where: { id: postId } });
+  const transaction = await sequelize.transaction();
 
-    if (deleteRow === 0) {
+  try {
+    const post = await Post.findByPk(postId, { include: [File], transaction });
+
+    if (!post) {
+      await transaction.rollback();
       return res
         .status(404)
-        .json({ success: false, error: "No se encontro el Album a borrar" });
+        .json({ success: false, error: "No se encontró el Álbum a borrar" });
     }
 
-    res.json({ success: true, message: "Registro borrado correctamente" });
+    // 1. Eliminar archivos de Vercel Blob
+    for (const file of post.Files) {
+      if (file.path && file.path.includes("public.blob.vercel-storage.com")) {
+        try {
+          await del(file.path, { token: serviceBlob.vercelBlobToken });
+        } catch (err) {
+          console.error(`Error al borrar de Vercel Blob: ${file.path}`, err);
+        }
+      }
+    }
+
+    await post.destroy({ transaction });
+
+    await transaction.commit();
+
+    res.json({
+      success: true,
+      message: "Álbum y todos sus archivos borrados correctamente",
+    });
   } catch (error) {
+    await transaction.rollback();
     console.error("❌ Error al intentar eliminar el post en la BD:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Ocurrio un error al intentar borrar el Album (post)",
-      });
+    res.status(500).json({
+      success: false,
+      error: "Ocurrio un error al intentar borrar el Album (post)",
+    });
   }
 };

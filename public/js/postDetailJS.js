@@ -1,30 +1,67 @@
-document.addEventListener("DOMContentLoaded", ()=>{
-  const deleteBtn = document.getElementById("deletePost-btn");
+document.addEventListener("DOMContentLoaded", () => {
+  // --- ELIMINAR POST (ÁLBUM) ---
+  const deletePostBtn = document.getElementById("deletePost-btn");
+  if (deletePostBtn) {
+    deletePostBtn.addEventListener("click", (e) => {
+      const postId = e.currentTarget.dataset.postId;
 
-  if(deleteBtn){
-    deleteBtn.addEventListener("click", async () => {
-      const postId = deleteBtn.getAttribute("data-idPost");
-
-      const message = "¿Estás seguro de que deseas borrar este álbum? Esta acción no se puede deshacer.";
-      const deletePost = async () => {
+      const message =
+        "¿Estás seguro de que quieres borrar este álbum y todas sus imágenes? Esta acción no se puede deshacer.";
+      const deleteAction = async () => {
         try {
-          const response = await fetch(`/post/${postId}`,{
-            method: "DELETE"
+          const response = await fetch(`/post/${postId}`, {
+            method: "DELETE",
           });
-
-          const result = await response.json();
-
-          if(!response.ok) throw new Error(result.error || "No se pudo eliminar el Album");
-
-          window.location.href = `/dashboard/posts`;
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || "Error desconocido al borrar el álbum.");
+          }
+          window.showGlobalModal(
+            "success",
+            "Álbum Borrado",
+            "El álbum ha sido eliminado correctamente.",
+            "Ir a Mis Posts",
+            "/dashboard/posts",
+          );
         } catch (error) {
-          console.error("❌ Error al borrar el Album", error);
-          setTimeout(() => {  //lo demoro para no superponer los modales y tener un error
-            window.showGlobalModal("error", "¡Error!", error.message, "Aceptar", null);            
+          console.error("Error al borrar el álbum:", error);
+          setTimeout(() => {
+            window.showGlobalModal("error", "Error", error.message);
           }, 300);
         }
       };
-      window.showGlobalModal("","Borrar Registro", message, "Aceptar",deletePost,"Cancelar","");
+
+      window.showGlobalModal("info", "Confirmar Borrado", message, "Borrar", deleteAction, "Cancelar");
     });
   }
+
+  // --- ELIMINAR UN ARCHIVO ---
+  const deleteFileBtns = document.querySelectorAll(".btn-delete-file");
+  deleteFileBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const { postId, fileId } = e.currentTarget.dataset;
+      const message = "¿Seguro que deseas borrar esta imagen?";
+
+      const deleteAction = async () => {
+        try {
+          const response = await fetch(`/post/${postId}/file/${fileId}`, {
+            method: "DELETE",
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || "Error desconocido al borrar la imagen.");
+          }
+          // Sacar tarjeta del DOM
+          e.currentTarget.closest(".col-md-6").remove();
+          window.showGlobalModal("success", "Imagen Borrada", "La imagen ha sido eliminada.");
+        } catch (error) {
+          console.error("Error al borrar la imagen:", error);
+          window.showGlobalModal("error", "Error", error.message);
+        }
+      };
+
+      window.showGlobalModal("info", "Confirmar Borrado", message, "Borrar", deleteAction, "Cancelar");
+    });
+  });
 });
+

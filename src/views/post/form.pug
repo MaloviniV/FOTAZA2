@@ -1,0 +1,46 @@
+extends ../layouts/main.pug
+include ../mixin/feedbackModal.pug
+
+block metadata
+  link(href="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.css" rel="stylesheet")
+  script(src="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.min.js" defer)
+  script(src="/js/formPostJS.js" type="module" defer)
+
+block content
+  .container.py-5
+    .row.justify-content-center
+      .col-lg-8.col-xl-7
+        .card.border-0.shadow-sm.rounded-4.bg-white
+          .card-header.bg-white.border-bottom.border-secondary-subtle.p-4.text-center
+            h2.fw-bold.text-dark.mb-0.fs-3= (id ? "Editar Álbum" : "Crear Nuevo Álbum")
+            p.text-secondary.mb-0.mt-1 Organiza tus imágenes en álbumes temáticos.
+
+          .card-body.p-4.p-md-5
+            form#form_post
+              if id
+                input#postId-input(type="hidden", name="postId", value=id)
+
+              .form-floating.mb-3
+                input.form-control.rounded-3#title(type="text" name="title" placeholder="Título del álbum..." value=title required)
+                label.text-secondary(for="title") Título del álbum
+
+              .form-floating.mb-3
+                textarea.form-control.rounded-3#description(name="description" placeholder="Ingresa una breve descripción..." style="height: 100px")= description
+                label.text-secondary(for="description") Descripción (Opcional)
+
+              .mb-4
+                label.form-label.fw-bold.text-dark.small.mb-1(for="tags") Etiquetas (Tags)
+                if (listTags && listTags.length > 0)
+                  select#tags(name="selectedTags" multiple)
+                    each tag in listTags
+                      option(value=tag selected=(selectedTags && selectedTags.includes(tag)))= tag.charAt(0).toUpperCase() + tag.slice(1)
+                else
+                  p.text-muted.small.fst-italic Sin etiquetas disponibles
+
+              .form-check.form-switch.mb-4
+                input.form-check-input#openComments(type="checkbox" name="openComments" value="true" checked=openComments)
+                label.form-check-label.fw-medium.text-secondary(for="openComments") Permitir comentarios en las imágenes de este álbum
+
+              .d-flex.justify-content-end.gap-2.mt-4.pt-4.border-top
+                button#cancel_btn.btn.btn-light.px-4.fw-bold.rounded-pill(type="button") Cancelar
+                button#create_btn.btn.btn-primary.px-5.fw-bold.rounded-pill.shadow-sm(type="submit")= (id ? "Guardar Cambios" : "Crear Álbum")

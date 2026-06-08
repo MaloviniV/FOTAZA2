@@ -2,7 +2,7 @@
   .card-body.p-4.p-md-5
     .row.align-items-center.text-center.text-md-start
       .col-md-auto.mb-4.mb-md-0
-        img.rounded-circle.object-fit-cover.border.border-4.border-white.shadow-sm(src=(user.avatarUrl || '/imagenes/avatar/default-avatar.png') alt=`Foto de ${user.nickname}` width="150" height="150")
+        img.rounded-circle.object-fit-cover.border.border-4.border-white.shadow-sm(src=(user.avatarUrl || '/images/default-user.png') alt=`Foto de ${user.nickname}` width="150" height="150")
       .col-md
         h2.fw-bold.text-dark.mb-1= user.nickname || user.firstName
         if user.createdAt

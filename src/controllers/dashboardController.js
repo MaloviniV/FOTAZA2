@@ -37,9 +37,8 @@ export const showPosts = async (req, res) => {
     const response = await Post.findAll({
       where: { idUser: userId },
       include: [{ model: File }],
-      raw: true
     });
-    const posts = response;
+    const posts = response.map((post) => post.toJSON());
 
     res.render("dashboard/posts.pug", { posts });
   } catch (error) {

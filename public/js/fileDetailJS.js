@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnDelete.addEventListener("click", async (e) => {
       const fileId = btnDelete.dataset.fileId;
       const postId = btnDelete.dataset.postId;
-      const submitBtn = e.target;
-      submitBtn.disabled = true; // Desactivamos para evitar dobles clics
+      const deleteButton = e.currentTarget;
+      deleteButton.disabled = true; // Desactivamos para evitar dobles clics
 
       const message =
         "¿Estás seguro de que deseas borrar este archivo permanentemente?";
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = `/post/${postId}`;
         } catch (error) {
           console.error("❌ Error al intentar borrar un archivo:", error);
-          submitBtn.disabled = false;
+          deleteButton.disabled = false;
           setTimeout(() => {
             //lo demoro para no superponer los modales y tener un error
             window.showGlobalModal(
@@ -40,82 +40,100 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
       window.showGlobalModal(
-        "",
-        "Borrar Registro",
+        "info",
+        "Borrar Archivo",
         message,
-        "Aceptar",
+        "Borrar",
         deleteFile,
         "Cancelar",
-        "",
+        null,
       );
     });
   }
 
   //VALORACION
-  const starsContainer = document.querySelector(".stars-container");
-  if (!starsContainer) return;
+  const starsContainer = document.querySelector(
+    ".stars-container:not(.disabled)",
+  );
+  if (starsContainer) {
+    const stars = starsContainer.querySelectorAll(".star-icon");
+    const ratingItem = document.querySelector(".rating-item");
+    const fileId = ratingItem.dataset.fileId;
+    const postId = ratingItem.dataset.postId;
 
-  const stars = starsContainer.querySelectorAll(".star-icon");
-  const ratingItem = document.querySelector(".rating-item");
-  const fileId = ratingItem.dataset.fileId;
+    let currentRating = Array.from(stars).filter((star) =>
+      star.classList.contains("fa-solid"),
+    ).length;
 
-  let currentRating = document.querySelectorAll(".star-icon.fa-solid").length;
+    const updateStarsUI = (hoverValue) => {
+      stars.forEach((star) => {
+        const starValue = parseInt(star.dataset.value, 10);
+        if (starValue <= hoverValue) {
+          star.classList.remove("fa-regular");
+          star.classList.add("fa-solid");
+        } else {
+          star.classList.remove("fa-solid");
+          star.classList.add("fa-regular");
+        }
+      });
+    };
 
-  //pintar estrellas
-  const updateStarsUI = (hoverValue) => {
-    stars.forEach((star) => {
-      const starValue = parseInt(star.dataset.value);
-      if (starValue <= hoverValue) {
-        star.classList.replace("fa-regular", "fa-solid");
-      } else {
-        star.classList.replace("fa-solid", "fa-regular");
+    starsContainer.addEventListener("mouseover", (e) => {
+      if (e.target.matches(".star-icon")) {
+        const hoverValue = parseInt(e.target.dataset.value, 10);
+        updateStarsUI(hoverValue);
       }
     });
-  };
 
-  stars.forEach((star) => {
-    star.addEventListener("mouseover", (e) => {
-      updateStarsUI(parseInt(e.target.dataset.value));
-    });
-
-    star.addEventListener("mouseout", () => {
+    starsContainer.addEventListener("mouseleave", () => {
       updateStarsUI(currentRating);
     });
 
-    star.addEventListener("click", async (e) => {
-      const score = parseInt(e.target.dataset.value);
+    starsContainer.addEventListener("click", async (e) => {
+      if (e.target.matches(".star-icon")) {
+        const score = parseInt(e.target.dataset.value, 10);
 
-      try {
-        const response = await fetch(`/api/file/${fileId}/rate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ score }),
-        });
+        try {
+          const response = await fetch(`/post/${postId}/file/${fileId}/rate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ score }),
+          });
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (data.success) {
-          currentRating = score;
-          updateStarsUI(currentRating);
+          if (data.success) {
+            currentRating = score;
+            updateStarsUI(currentRating);
 
-          const avgElement = document.querySelector(".rating-average");
-          const countElement = document.querySelector(".rating-count");
+            const avgElement = document.querySelector(".rating-average");
+            const countElement = document.querySelector(".rating-count");
 
-          if (avgElement) avgElement.textContent = `${data.newAverage} / 5`;
-          if (countElement)
-            countElement.textContent = `(${data.newTotal} votos)`;
+            if (avgElement) avgElement.textContent = `${data.newAverage} / 5`;
+            if (countElement)
+              countElement.textContent = `(${data.newTotal} votos)`;
 
-          //animacion de las estrellas
-          e.target.style.transform = "scale(1.3)";
-          setTimeout(() => (e.target.style.transform = "scale(1)"), 200);
-        } else {
-          alert(data.error || "Inicia sesión para poder valorar.");
+            // Animacion de la estrella
+            e.target.style.transform = "scale(1.3)";
+            setTimeout(() => (e.target.style.transform = "scale(1)"), 200);
+          } else {
+            window.showGlobalModal(
+              "error",
+              "Error de Valoración",
+              data.error || "Inicia sesión para poder valorar.",
+            );
+          }
+        } catch (err) {
+          console.error("Error de conexión al valorar:", err);
+          window.showGlobalModal(
+            "error",
+            "Error de Conexión",
+            "No se pudo guardar la valoración. Inténtalo de nuevo.",
+          );
         }
-      } catch (err) {
-        console.error("Error de conexión:", err);
       }
     });
-  });
+  }
 
   // BORRAR COMENTARIO
   const deleteCommentBtns = document.querySelectorAll(".btn-delete-comment");
@@ -143,16 +161,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 result.error || "No se pudo eliminar el comentario",
               );
 
-            const commentCard = btn.closest(".comment-card");
-            if (commentCard) commentCard.remove();
+            const commentItem = btn.closest(".d-flex.gap-3");
+            if (commentItem) {
+              const commentsContainer = commentItem.parentElement;
+              commentItem.remove();
 
-            const commentsList = document.querySelector(".comments-list");
-            if (
-              commentsList &&
-              commentsList.querySelectorAll(".comment-card").length === 0
-            ) {
-              commentsList.innerHTML =
-                '<p class="empty-text">No hay comentarios aún. ¡Sé el primero en opinar!</p>';
+              
+              if (commentsContainer && commentsContainer.children.length === 0) {
+                const emptyStateDiv = document.createElement('div');
+                emptyStateDiv.className = 'text-center py-4';
+                const emptyStateP = document.createElement('p');
+                emptyStateP.className = 'text-muted mb-0';
+                emptyStateP.textContent = 'No hay comentarios aún. ¡Sé el primero en opinar!';
+                emptyStateDiv.appendChild(emptyStateP);
+
+                commentsContainer.replaceWith(emptyStateDiv);
+              }
             }
           } catch (error) {
             console.error("❌ Error al borrar el comentario:", error);
@@ -172,13 +196,13 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         window.showGlobalModal(
-          "",
+          "info",
           "Borrar Comentario",
           message,
-          "Aceptar",
+          "Borrar",
           deleteComment,
           "Cancelar",
-          "",
+          null,
         );
       });
     });

@@ -2,13 +2,32 @@ import Post from "../models/Post.js";
 import File from "../models/File.js";
 import User from "../models/User.js";
 
-export const seedTestData = async (testUser) => {
+export const seedTestData = async () => {
   try {
+    // 1. Crear usuario principal de prueba (Antes estaba en app.js)
+    const [testUser, created] = await User.findOrCreate({
+      where: { email: "mail@mail.com" },
+      defaults: {
+        firstName: "Vic",
+        lastName: "Malo",
+        nickname: "@testVic",
+        dni: "11111111",
+        birthdate: "1988-02-20",
+        password: "1111",
+        role: "usuario",
+        avatarUrl:
+          "https://ui-avatars.com/api/?name=Vic+Malo&background=random",
+      },
+    });
+
+    // Si el usuario ya existía, asumimos que la BD ya tiene datos y cortamos la ejecución aquí
+    if (!created) return;
+
     console.log(
       "🌱 Verificando y poblando la base de datos con múltiples usuarios, álbumes y fotos de prueba...",
     );
 
-    // 1. Definir lista de usuarios adicionales de prueba
+    // 2. Definir lista de usuarios adicionales de prueba
     const testUsersData = [
       {
         firstName: "Ana",
@@ -58,7 +77,7 @@ export const seedTestData = async (testUser) => {
       usersToSeed.push(user);
     }
 
-    // 2. Definir una plantilla de álbumes variados
+    // 3. Definir una plantilla de álbumes variados
     const albumsTemplates = [
       {
         title: "Aventura en la Montaña",
@@ -114,7 +133,7 @@ export const seedTestData = async (testUser) => {
 
     let imageId = 10; // Para usar picsum.photos/id/10, 11, 12... de forma secuencial
 
-    // 3. Crear álbumes y fotos para CADA usuario
+    // 4. Crear álbumes y fotos para CADA usuario
     for (const user of usersToSeed) {
       const postCount = await Post.count({ where: { idUser: user.id } });
 

@@ -5,6 +5,7 @@ import Rating from "../models/Rating.js";
 import Comment from "../models/Comment.js";
 import { put, del } from "@vercel/blob";
 import { LIST_TAGS } from "../utils/constants.js";
+import { serviceBlob } from "../config/config.js";
 
 //MUESTRA EL FORMULARIO PARA CARGAR/MODIFICAR 1 ARCHIVO
 export const showFormFile = async (req, res) => {
@@ -19,7 +20,7 @@ export const showFormFile = async (req, res) => {
   if (!fileId) {
     //SI NO HAY ARCHIVO
     const titlePost = req.query.titlePost;
-    return res.render("post/formFile.pug", { ...viewData, titlePost });
+    return res.render("file/form.pug", { ...viewData, titlePost });
   }
 
   try {
@@ -49,7 +50,7 @@ export const showFormFile = async (req, res) => {
     });
 
     if (!response) {
-      return res.status(404).render("post/formFile.pug", {
+      return res.status(404).render("file/form.pug", {
         ...viewData,
         success: false,
         error: "No se encontro el Archivo",
@@ -58,14 +59,14 @@ export const showFormFile = async (req, res) => {
 
     const file = response.toJSON();
 
-    return res.render("post/formFile.pug", {
+    return res.render("file/form.pug", {
       ...viewData,
       ...file,
       message: "Archivo recuperado con exito",
     });
   } catch (error) {
     console.error("Error al recuperar el Archivo en la BD:", error);
-    return res.status(500).render("post/formFile.pug", {
+    return res.status(500).render("file/form.pug", {
       ...viewData,
       success: false,
       error: "Ocurrio un error al intentar recuperar los datos del Archivo",
@@ -122,16 +123,17 @@ export const createFile = async (req, res) => {
 
     const { mimetype } = req.file;
 
-    // Subimos el archivo a Vercel Blob usando su buffer
+    // Subo el archivo a Vercel Blob
     const blob = await put(
       `fotaza/${Date.now()}-${req.file.originalname}`,
       req.file.buffer,
       {
         access: "public",
+        token: serviceBlob.vercelBlobToken,
       },
     );
 
-    const path = blob.url; // Obtiene la URL publica generada
+    const path = blob.url;
 
     if (!selectedTags) {
       return res.status(400).json({
@@ -161,7 +163,7 @@ export const createFile = async (req, res) => {
       error.name === "SequelizeValidationError" ||
       error.name === "SequelizeUniqueConstraintError"
     ) {
-      // Error de validación o restricción
+      // Error de validacion o restriccion
       res
         .status(422)
         .json({ success: false, error: "Error con los datos ingresados" });
@@ -204,7 +206,7 @@ export const showFile = async (req, res) => {
     });
 
     if (!response) {
-      return res.status(404).render("post/fileDetail.pug", {
+      return res.status(404).render("file/detail.pug", {
         error: "No se encontró el archivo solicitado",
         postId,
       });
@@ -228,10 +230,10 @@ export const showFile = async (req, res) => {
       if (currentRating) file.userRating = currentRating.score;
     }
 
-    res.render("post/fileDetail.pug", { file });
+    res.render("file/detail.pug", { file });
   } catch (error) {
     console.error("❌ Error al obtener el detalle del archivo:", error);
-    res.render("post/fileDetail.pug", {
+    res.render("file/detail.pug", {
       error: "Error al intentar cargar el archivo",
       postId,
     });
@@ -335,7 +337,6 @@ export const updateFile = async (req, res) => {
       textCopyright,
     };
 
-
     if (req.file) {
       // Subo el nuevo archivo a Vercel Blob
       const blob = await put(
@@ -343,6 +344,7 @@ export const updateFile = async (req, res) => {
         req.file.buffer,
         {
           access: "public",
+          token: serviceBlob.vercelBlobToken,
         },
       );
 
@@ -385,7 +387,7 @@ export const deleteFile = async (req, res) => {
       file.path.includes("public.blob.vercel-storage.com")
     ) {
       try {
-        await del(file.path);
+        await del(file.path, { token: serviceBlob.vercelBlobToken });
       } catch (err) {
         console.error("Error al borrar de Vercel Blob:", err);
       }

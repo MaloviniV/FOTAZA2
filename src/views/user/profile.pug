@@ -1,37 +1,23 @@
-extends ../layout.pug
+extends ../layouts/main.pug
 
 block metadata
-  link(rel="stylesheet", href="/css/dashboardStyle.css")
-  link(rel="stylesheet", href="/css/_cardStyle.css")
   script(src="/js/profileJS.js" type="module" defer)
 
 block content
-  //- --- CABECERA DEL USUARIO ---
-  section#main-user
-    #profile-user
-      #photoProfile.profile-user
-        img(src=(visitedUser.avatarUrl || '/imagenes/avatar/default-avatar.png') alt=`Foto de ${visitedUser.nickname}`)
-      #info-user.profile-user
-        h2= visitedUser.nickname || visitedUser.firstName
-        p(style="color: #64748b; font-size: 0.9rem;") Miembro desde #{new Date(visitedUser.createdAt).getFullYear()}
-      #statistics.profile-user
-        h4 Uploads: #{numberOfFiles}
-        h4 Posts: #{numberOfPosts}
-        h4 Followings: #{numberOfFollowings}
-        h4 Followers: <span id="followers-count">#{numberOfFollowers}</span>
-        
-      if currentUser && currentUser.id !== visitedUser.id
-        div(style="margin-top: 15px;")
-          button#btn-follow.action-btn(class=(isFollowing ? "secondary" : "primary") data-user-id=visitedUser.id style="padding: 0.5rem 1.5rem; border-radius: 999px;") #{isFollowing ? "Dejar de seguir" : "Seguir"}
+  .container.py-5
+    //- --- CABECERA DEL USUARIO ---
+    - const user = visitedUser
+    include ../partials/_userHeader.pug
 
-  //- --- GALERIA DE FOTOS ---
-  section.user-gallery(style="max-width: 1200px; margin: 3rem auto; padding: 0 1.5rem;")
-    h3(style="margin-bottom: 1.5rem; color: #0f172a; font-size: 1.5rem;") Publicaciones de #{visitedUser.nickname}
-    
-    if files && files.length > 0
-      .grid-container(style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;")
-        include ../partials/_card.pug
-    else
-      .empty-state(style="text-align: center; padding: 4rem 0; color: #64748b;")
-        i.fa-solid.fa-camera(style="font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1;")
-        p Este usuario aún no ha subido fotografías.
+    //- --- GALERIA DE FOTOS ---
+    .mb-4
+      h3.fw-bold.text-dark Publicaciones de #{visitedUser.nickname}
+      
+      if files && files.length > 0
+        .grid-container(style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;")
+          include ../partials/_card.pug
+      else
+        .text-center.py-5.bg-white.rounded-4.border.border-secondary-subtle.shadow-sm
+          i.fa-solid.fa-camera.text-secondary.mb-3(style="font-size: 3rem; opacity: 0.5;")
+          h5.text-dark.fw-medium Este usuario aún no ha subido fotografías
+          p.text-secondary Vuelve más tarde para ver sus nuevas publicaciones.

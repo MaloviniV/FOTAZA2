@@ -1,0 +1,90 @@
+extends ../layouts/main.pug
+include ../mixin/feedbackModal.pug
+
+block metadata
+    link(href="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.css" rel="stylesheet")
+    script(src="https://cdn.jsdelivr.net/npm/slim-select@latest/dist/slimselect.min.js" defer)
+    script(src="/js/formFileJS.js" type="module" defer)
+    
+    style.
+      .oculto { display: none !important; }
+      .border-dashed { border-style: dashed !important; border-width: 2px !important; }
+
+block content
+  if error
+    +feedbackModal(
+      "error",
+      "¡Error de archivo!",
+      error,
+      "Aceptar"
+    )
+
+  .container.py-5
+    .row.justify-content-center
+      .col-lg-10.col-xl-9
+        .card.border-0.shadow-sm.rounded-4.bg-white
+          .card-header.bg-white.border-bottom.border-secondary-subtle.p-4.text-center
+            h2.fw-bold.text-dark.mb-0.fs-3= (id ? "Editar Archivo" : "Subir Nuevo Archivo")
+            p.text-secondary.mb-0.mt-1 Completa los datos para publicar en tu álbum
+            
+          .card-body.p-4.p-md-5
+            form#form_uploadFile.row.g-4
+              //- ARCHIVO Y VISTA PREVIA
+              .col-md-5.d-flex.flex-column
+                label.form-label.fw-bold.text-dark(for="file") Seleccionar Multimedia
+                input.form-control.rounded-3(type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg, video/mp4, video/webm" required=!id)
+                
+                .mt-3.flex-grow-1.d-flex.align-items-center.justify-content-center.bg-light.border.border-dashed.border-secondary-subtle.rounded-4.overflow-hidden.position-relative(style="min-height: 250px;")
+                  i.fa-solid.fa-cloud-arrow-up.text-secondary.opacity-25.position-absolute(style="font-size: 4rem; z-index: 0;")
+                  if path && mimetype && mimetype.startsWith('video/')
+                    img.w-100.h-100.object-fit-cover.oculto#image_preview(alt="Vista previa" style="z-index: 1;")
+                    video.w-100.h-100.object-fit-cover#video_preview(controls src=path style="z-index: 1;")
+                  else if path
+                    img.w-100.h-100.object-fit-cover#image_preview(alt="Vista previa" src=path style="z-index: 1;")
+                    video.w-100.h-100.object-fit-cover.oculto#video_preview(controls style="z-index: 1;")
+                  else
+                    img.w-100.h-100.object-fit-cover.oculto#image_preview(alt="Vista previa" style="z-index: 1;")
+                    video.w-100.h-100.object-fit-cover.oculto#video_preview(controls style="z-index: 1;")
+
+              //- METADATA
+              .col-md-7
+                .mb-3
+                  label.form-label.fw-bold.text-dark.small.mb-1 Álbum Destino
+                  input.form-control.bg-light.text-muted.rounded-3(type="text" name="titlePost" value=(titlePost || (Post && Post.title)) readonly)
+                  input#idPost_input(type="hidden" name="idPost" value=idPost)
+                
+                .form-floating.mb-3
+                  input.form-control.rounded-3#title(type="text" name="title" placeholder="Titulo del archivo..." required value=title)
+                  label.text-secondary(for="title") Título de la imagen
+                
+                .form-floating.mb-3
+                  input.form-control.rounded-3#description(type="text" name="description" placeholder="Ingresa una breve descripcion..." value=description)
+                  label.text-secondary(for="description") Descripción (Opcional)
+                  
+                .mb-4
+                  label.form-label.fw-bold.text-dark.small.mb-1(for="tags") Etiquetas (Tags)
+                  if (listTags && listTags.length > 0)
+                    select#tags(name="selectedTags" multiple)
+                      each tag in listTags 
+                        option(value=tag selected=(selectedTags && selectedTags.includes(tag)))= tag.charAt(0).toUpperCase() + tag.slice(1)
+                  else
+                      p.text-muted.small.fst-italic Sin Etiquetas disponibles
+                      
+                .d-flex.flex-wrap.gap-4.mb-3
+                  .form-check.form-switch
+                    input.form-check-input#openComments(type="checkbox" name="openComments" value="true" checked=(openComments ? true : false))
+                    label.form-check-label.fw-medium.text-secondary(for="openComments") Permitir comentarios
+                    
+                  .form-check.form-switch
+                    input.form-check-input#hasCopyright(type="checkbox" name="hasCopyright")
+                    label.form-check-label.fw-medium.text-secondary(for="hasCopyright") Aplicar Copyright
+                    
+                #copyright_text.oculto
+                  .form-floating
+                    input.form-control.rounded-3#textCopyrightInput(type="text" name="textCopyright" placeholder="Texto del copyright..." value=textCopyright)
+                    label.text-secondary(for="textCopyrightInput") Texto de Copyright
+              
+              //- BOTONES
+              .col-12.d-flex.justify-content-end.gap-2.mt-4.pt-4.border-top
+                button#cancel_btn.btn.btn-light.px-4.fw-bold.rounded-pill(type="button") Cancelar
+                button#upload_btn.btn.btn-primary.px-5.fw-bold.rounded-pill.shadow-sm(type="submit") Guardar Archivo

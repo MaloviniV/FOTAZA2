@@ -77,7 +77,9 @@ document.addEventListener("DOMContentLoaded", () => {
     //VALIDACIONES DEL FORMULARIO
     // Validar que haya al menos un tag
     if (tagsSelect?.selectedOptions.length === 0) {
-      alert(
+      window.showGlobalModal(
+        "error",
+        "Validación",
         "Por favor, selecciona al menos una etiqueta (TAG) antes de subir el archivo.",
       );
       return;
@@ -92,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const formData = new FormData(form);
       const idPost = formData.get("idPost");
 
-      // Determinamos si es una edición (si hay un fileId en la URL)
+      // Determino si es una edicion (si hay un fileId en la URL)
       const urlParams = new URLSearchParams(window.location.search);
       const fileId = urlParams.get("fileId");
 

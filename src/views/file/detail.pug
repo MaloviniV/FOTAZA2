@@ -1,0 +1,95 @@
+extends ../layouts/main.pug
+include ../mixin/feedbackModal.pug
+include ../mixin/_comments.pug
+
+block metadata
+  script(src="/js/fileDetailJS.js" type="module" defer)
+
+block content
+  if error
+    +feedbackModal(
+      "error",
+      "¡Error al cargar el Archivo!",
+      error,
+      "Volver",
+      `/post/${postId}`
+    )
+
+  if file
+    .container.py-5
+      //- ENCABEZADO DEL ARCHIVO
+      .card.border-0.shadow-sm.rounded-4.mb-4.bg-white
+        .card-body.p-4.p-md-5
+          .d-flex.flex-column.flex-lg-row.justify-content-between.align-items-start.gap-4
+            .file-info
+              h1.fw-bold.text-dark.mb-3= file.title || 'Sin título'
+              
+              //- INFO DEL AUTOR Y ALBUM
+              - const author = file.Post && file.Post.User ? file.Post.User : null
+              if author
+                .d-flex.align-items-center.flex-wrap.gap-3.mb-4
+                  a.text-decoration-none.text-dark.fw-semibold.d-inline-flex.align-items-center.hover-zoom(href=`/user/${author.id}`)
+                    img.rounded-circle.me-2.object-fit-cover.border.border-2(src=(author.avatarUrl || '/images/default-user.png') alt=`Avatar de ${author.nickname}` width="35" height="35")
+                    | #{author.nickname}
+                  span.text-secondary.opacity-50 |
+                  a.text-decoration-none.text-primary.fw-semibold.hover-zoom(href=`/post/${file.idPost}`) 
+                    i.fa-solid.fa-folder-open.me-2
+                    | Álbum: #{file.Post.title}
+
+              if file.description
+                p.text-secondary.fs-5.mb-0= file.description
+                
+              .d-flex.flex-wrap.gap-3.mt-4
+                span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill.d-flex.align-items-center
+                  i.fa-solid.fa-tags.me-2.text-secondary
+                  | #{Array.isArray(file.selectedTags) ? file.selectedTags.join(', ') : file.selectedTags || "Sin etiquetas"}
+                span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill.d-flex.align-items-center
+                  i.fa-solid.fa-copyright.me-2.text-secondary
+                  | #{file.textCopyright ? 'Copyright' : 'Libre'}
+                
+                //- SISTEMA DE VALORACION (ESTRELLAS)
+                span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill.d-flex.align-items-center.rating-item(data-file-id=file.id data-post-id=file.idPost)
+                  span.text-secondary.fw-medium.me-2 Valoración:
+                  - const isOwner = currentUser && author && currentUser.id === author.id
+                  if isOwner
+                    .stars-container.disabled(style="display: inline-flex; gap: 4px; color: #cbd5e1; font-size: 1.1em;" title="No puedes valorar tus propias fotos")
+                      - const avgRating = Math.round(file.averageRating || 0)
+                      each star in [1, 2, 3, 4, 5]
+                        i(class=(avgRating >= star ? 'fa-solid fa-star' : 'fa-regular fa-star'))
+                  else
+                    .stars-container(style="display: inline-flex; gap: 4px; color: #fbbf24; cursor: pointer; font-size: 1.1em;")
+                      - const currentUserRating = file.userRating || 0
+                      each star in [1, 2, 3, 4, 5]
+                        i.star-icon(class=(currentUserRating >= star ? 'fa-solid fa-star' : 'fa-regular fa-star') data-value=star style="transition: transform 0.2s;")
+                  span.rating-average.ms-2.fw-bold.text-dark #{file.averageRating ? file.averageRating : '0'} / 5
+                  span.rating-count.ms-1.text-secondary.fw-normal (#{file.totalRatings || 0} votos)
+
+            .file-actions-wrapper.d-flex.flex-column.gap-3.align-items-lg-end
+              .d-flex.flex-wrap.gap-2
+                a.btn.btn-outline-secondary.rounded-pill.px-4.fw-medium(href=`/post/${file.idPost}`) 
+                  i.fa-solid.fa-arrow-left.me-2
+                  | Volver al Álbum
+              .file-actions.d-flex.flex-wrap.gap-2
+                if currentUser && author && currentUser.id === author.id
+                  a.btn.btn-outline-primary.rounded-pill.px-4.fw-medium(href=`/post/${file.idPost}/file/?fileId=${file.id}`) Editar
+                  button#btn-delete.btn.btn-outline-danger.rounded-pill.px-4.fw-medium(data-post-id=file.idPost data-file-id=file.id) Borrar
+                else
+                  button.btn.btn-primary.rounded-pill.px-4.fw-bold.shadow-sm(title="Añadir a colección") 
+                    i.fa-solid.fa-bookmark.me-2
+                    | Guardar en colección
+
+      //- CONTENEDOR MULTIMEDIA
+      .card.border-0.shadow-sm.rounded-4.overflow-hidden.mb-5.bg-dark.text-center.d-flex.align-items-center.justify-content-center(style="min-height: 300px;")
+        if file.mimetype && file.mimetype.startsWith('video/')
+          video.w-100.object-fit-contain(controls style="max-height: 75vh;")
+            source(src=file.path type=file.mimetype)
+            | Archivo incompatible.
+        else
+          img.img-fluid.object-fit-contain(src=file.path alt=file.title || "Archivo multimedia" style="max-height: 75vh;")
+
+      //- SECCION DE COMENTARIOS
+      +comments(file, `/post/${file.idPost}/file/${file.id}/comment`, true)
+
+  else if !error
+    .container.py-5
+      .alert.alert-warning.text-center.rounded-4 No se encontró el archivo solicitado.

@@ -12,9 +12,10 @@ export const showUserProfile = async (req, res) => {
     });
 
     if (!visitedUser) {
-      return res
-        .status(404)
-        .render("error.pug", { error: "Usuario no encontrado" });
+      return res.status(404).render("error.pug", {
+        title: "Usuario no encontrado",
+        message: "El usuario que estás buscando no existe o ha sido eliminado.",
+      });
     }
 
     const numberOfPosts = await Post.count({ where: { idUser: id } });
@@ -89,11 +90,9 @@ export const toggleFollow = async (req, res) => {
     }
   } catch (error) {
     console.error("❌ Error al seguir/dejar de seguir:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        error: "Ocurrió un error al procesar la solicitud.",
-      });
+    return res.status(500).json({
+      success: false,
+      error: "Ocurrió un error al procesar la solicitud.",
+    });
   }
 };

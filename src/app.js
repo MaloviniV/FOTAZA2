@@ -67,7 +67,8 @@ app.use((req, res, next) => {
 //Middleware Global de Manejo de Errores
 app.use((err, req, res, next) => {
   console.error("💥 ERROR ATRAPADO:", err.message);
-  res.status(err.statusCode || 500).json({
+  //res.status(err.statusCode || 500).json({
+  res.status(err.statusCode || 500).render("error.pug",{
     success: false,
     error: err.message || "Error interno del servidor",
   });

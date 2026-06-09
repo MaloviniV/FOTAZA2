@@ -11,12 +11,9 @@ export const processLogin = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email } });
 
-    // COMENTADO PARA USAR EN DESARROLLO
-/*       const passwordMatch = user
-    ? await bcrypt.compare(password, user.password)
-    : false; */
-    const passwordMatch = user ? user.password === password : false;
-
+    const passwordMatch = user
+      ? await bcrypt.compare(password, user.password)
+      : false;
     if (user && passwordMatch) {
       req.session.user = {
         id: user.id,
@@ -52,9 +49,8 @@ export const prossesRegister = async (req, res) => {
     req.body;
 
   try {
-    // DESCOMENTAR PARA DESPLIEGUE ******************
-/*     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds); */
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = await User.create({
       firstName,
@@ -63,8 +59,7 @@ export const prossesRegister = async (req, res) => {
       dni,
       birthdate,
       email,
-      // password: hashedPassword
-      password: password
+      password: hashedPassword,
     });
 
     res.redirect(

@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import Comment from "../models/Comment.js";
 import Rating from "../models/Rating.js";
 import Follow from "../models/Follow.js";
+import bcrypt from "bcrypt";
 
 // Datos de usuarios de prueba
 const TEST_USERS = [
@@ -93,9 +94,18 @@ export const seedTestData = async () => {
       "🌱 Poblando la base de datos con usuarios, albumes y fotos de prueba...",
     );
 
+    // Hashear las contraseñas antes de crear los usuarios
+    const usersWithHashedPasswords = await Promise.all(
+      TEST_USERS.map(async (userData) => {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+        return { ...userData, password: hashedPassword };
+      }),
+    );
+
     // Creo todos los usuarios
     const usersToSeed = [];
-    for (const userData of TEST_USERS) {
+    for (const userData of usersWithHashedPasswords) {
       const user = await User.findOrCreate({
         where: { email: userData.email },
         defaults: userData,

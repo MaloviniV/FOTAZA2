@@ -14,82 +14,99 @@ import { requireAuth } from "./middlewares/authMidleware.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
+let cachedApp = null;
 
-//Configuracion Motor de Vistas (PUG)
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "views"));
+const bootstrap = async () => {
+  if (cachedApp) {
+    return cachedApp;
+  }
 
-//Middlewares Generales
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "..", "public")));
+  const app = express();
 
-//Configuracion de Sesiones en BD
-const SequelizeStore = connectSessionSequelize(session.Store);
-const sessionStore = new SequelizeStore({ db: sequelize });
+  //Configuracion Motor de Vistas (PUG)
+  app.set("view engine", "pug");
+  app.set("views", path.join(__dirname, "views"));
 
-app.use(
-  session({
-    secret: server.sessionSecret,
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: server.isProduction, //en produccion HTTPS(true), en desarrollo HTTP(false)
-      maxAge: 1000 * 60 * 60 * 24,
-    },
-  }),
-);
+  //Middlewares Generales
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(express.static(path.join(__dirname, "..", "public")));
 
-//Middleware global para vistas (inyecta la sesion)
-app.use((req, res, next) => {
-  req.user = req.session.user || null;
-  res.locals.currentUser = req.session.user || null;
-  next();
-});
+  //Configuracion de Sesiones en BD
+  const SequelizeStore = connectSessionSequelize(session.Store);
+  const sessionStore = new SequelizeStore({ db: sequelize });
 
-//Rutas de la aplicacion
-app.use("/post", requireAuth, routes.postRoutes);
-app.use("/dashboard", requireAuth, routes.dashboardRoutes);
-app.use("/user", requireAuth, routes.userRoutes);
-app.use("/auth", routes.authRoutes);
-app.use("/search", routes.searchRoutes);
-app.use("/", routes.homeRoutes);
-
-//Manejo de Errores (rutas no encontradas)
-app.use((req, res, next) => {
-  const err = new Error(`💥 No se encontró la ruta ${req.originalUrl}`);
-  err.statusCode = 404;
-  next(err);
-});
-
-//Middleware Global de Manejo de Errores
-app.use((err, req, res, next) => {
-  console.error("💥 ERROR ATRAPADO:", err.message);
-  res.status(err.statusCode || 500).render("error.pug", {
-    success: false,
-    error: err.message || "Error interno del servidor",
-  });
-});
-
-//Inicializacion del Servidor y Base de Datos
-const startApp = async () => {
   try {
     await connectDatabase();
     await sessionStore.sync();
   } catch (error) {
     console.error("Error al inicializar la base de datos:", error);
+    // Si la BD falla, la app no puede funcionar.
+    process.exit(1);
   }
 
-  // Levantar el servidor (Omitido en Vercel)
+  app.use(
+    session({
+      secret: server.sessionSecret,
+      store: sessionStore,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: server.isProduction, //en produccion HTTPS(true), en desarrollo HTTP(false)
+        maxAge: 1000 * 60 * 60 * 24,
+      },
+    }),
+  );
+
+  //Middleware global para vistas (inyecta la sesion)
+  app.use((req, res, next) => {
+    req.user = req.session.user || null;
+    res.locals.currentUser = req.session.user || null;
+    next();
+  });
+
+  //Rutas de la aplicacion
+  app.use("/post", requireAuth, routes.postRoutes);
+  app.use("/dashboard", requireAuth, routes.dashboardRoutes);
+  app.use("/user", requireAuth, routes.userRoutes);
+  app.use("/auth", routes.authRoutes);
+  app.use("/search", routes.searchRoutes);
+  app.use("/", routes.homeRoutes);
+
+  //Manejo de Errores (rutas no encontradas)
+  app.use((req, res, next) => {
+    const err = new Error(`💥 No se encontró la ruta ${req.originalUrl}`);
+    err.statusCode = 404;
+    next(err);
+  });
+
+  //Middleware Global de Manejo de Errores
+  app.use((err, req, res, next) => {
+    console.error("💥 ERROR ATRAPADO:", err.message);
+    res.status(err.statusCode || 500).render("error.pug", {
+      success: false,
+      error: err.message || "Error interno del servidor",
+    });
+  });
+
+  cachedApp = app;
+  return app;
+};
+
+// Para desarrollo local, iniciar el servidor.
+const startLocalServer = async () => {
   if (!server.isProduction) {
-    app.listen(server.port, () => {
+    const localApp = await bootstrap();
+    localApp.listen(server.port, () => {
       console.log(`Servidor corriendo en: http://localhost:${server.port}`);
     });
   }
 };
 
-startApp();
+startLocalServer();
 
-export default app;
+// Handler para Vercel
+export default async (req, res) => {
+  const app = await bootstrap();
+  app(req, res);
+};

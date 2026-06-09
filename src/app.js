@@ -23,6 +23,11 @@ const bootstrap = async () => {
 
   const app = express();
 
+  // Confiar en el proxy de Vercel en producción para que las cookies seguras funcionen
+  if (server.isProduction) {
+    app.set("trust proxy", 1);
+  }
+
   //Configuracion Motor de Vistas (PUG)
   app.set("view engine", "pug");
   app.set("views", path.join(__dirname, "views"));

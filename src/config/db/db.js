@@ -124,18 +124,15 @@ export const connectDatabase = async () => {
   await sequelize.authenticate();
   console.log("✅ Conexión a PostgreSQL establecida con éxito.");
 
-  if (database.sync) {
-    await sequelize.sync({ alter: true});
-    console.log("✅ BD sincronizada con éxito.");
+  // Sincroniza la base de datos: crea tablas si no existen.
+  // En desarrollo (DB_SYNC=true), alterará las tablas existentes.
+  // En producción (DB_SYNC=false), solo creará tablas nuevas, sin alterar las existentes.
+  await sequelize.sync({ alter: database.sync });
+  console.log(`✅ BD sincronizada con éxito (alter: ${database.sync}).`);
 
-    await applyConstraintsAndTriggers();
+  await applyConstraintsAndTriggers();
 
-    // Pueblo la base de datos si esta vacia
-    const { seedTestData } = await import("./testSeeder.js");
-    await seedTestData();
-  } else {
-    console.log(
-      "⚠️  BD no sincronizada. (Habilita DB_SYNC en .env si necesitas cambios)",
-    );
-  }
+  // Intenta poblar la base de datos. La función seedTestData verificará si ya hay datos.
+  const { seedTestData } = await import("../../seeders/testSeeder.js");
+  await seedTestData();
 };

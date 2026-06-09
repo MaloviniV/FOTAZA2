@@ -130,9 +130,9 @@ export const connectDatabase = async () => {
   await sequelize.sync({ alter: database.sync });
   console.log(`✅ BD sincronizada con éxito (alter: ${database.sync}).`);
 
-  await applyConstraintsAndTriggers();
-
   // Intenta poblar la base de datos. La función seedTestData verificará si ya hay datos.
   const { seedTestData } = await import("../../seeders/testSeeder.js");
   await seedTestData();
+
+  await applyConstraintsAndTriggers();
 };

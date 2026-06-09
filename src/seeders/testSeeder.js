@@ -1,182 +1,209 @@
 import Post from "../models/Post.js";
 import File from "../models/File.js";
 import User from "../models/User.js";
+import Comment from "../models/Comment.js";
+import Rating from "../models/Rating.js";
+import Follow from "../models/Follow.js";
+
+// Datos de usuarios de prueba
+const TEST_USERS = [
+  {
+    firstName: "Vic",
+    lastName: "Malo",
+    nickname: "@testVic",
+    dni: "11111111",
+    birthdate: "1988-02-20",
+    email: "mail@mail.com",
+    password: "1111",
+    role: "usuario",
+    avatarUrl: "https://ui-avatars.com/api/?name=Vic+Malo&background=random",
+  },
+  {
+    firstName: "Ana",
+    lastName: "García",
+    nickname: "anita_g",
+    dni: "44444444",
+    birthdate: "1995-04-12",
+    email: "ana@mail.com",
+    password: "123",
+    avatarUrl: "https://ui-avatars.com/api/?name=Ana+Garcia&background=random",
+  },
+  {
+    firstName: "Carlos",
+    lastName: "López",
+    nickname: "carlos_l",
+    dni: "22222222",
+    birthdate: "1988-10-20",
+    email: "carlos@mail.com",
+    password: "123",
+    avatarUrl:
+      "https://ui-avatars.com/api/?name=Carlos+Lopez&background=random",
+  },
+  {
+    firstName: "María",
+    lastName: "Fernández",
+    nickname: "mary_f",
+    dni: "33333333",
+    birthdate: "1992-07-05",
+    email: "maria@mail.com",
+    password: "123",
+    avatarUrl:
+      "https://ui-avatars.com/api/?name=Maria+Fernandez&background=random",
+  },
+];
+
+const ALBUMS_TEMPLATES = [
+  {
+    title: "Aventura en la Montaña",
+    desc: "Fotos de mi último viaje a los Andes.",
+    tags: ["Paisaje", "Naturaleza"],
+  },
+  {
+    title: "Viaje a la Playa",
+    desc: "Relajación total frente al mar.",
+    tags: ["Paisaje", "Viajes"],
+  },
+  {
+    title: "Paisajes Urbanos",
+    desc: "Explorando la jungla de cemento.",
+    tags: ["Urbano", "Arquitectura"],
+  },
+  {
+    title: "Mis Mascotas",
+    desc: "Momentos divertidos en casa.",
+    tags: ["Naturaleza"],
+  },
+  {
+    title: "Ruta Gastronómica",
+    desc: "Comida deliciosa del fin de semana.",
+    tags: ["Viajes", "Urbano"],
+  },
+];
 
 export const seedTestData = async () => {
   try {
-    // 1. Crear usuario principal de prueba (Antes estaba en app.js)
-    const [testUser, created] = await User.findOrCreate({
-      where: { email: "mail@mail.com" },
-      defaults: {
-        firstName: "Vic",
-        lastName: "Malo",
-        nickname: "@testVic",
-        dni: "11111111",
-        birthdate: "1988-02-20",
-        password: "1111",
-        role: "usuario",
-        avatarUrl:
-          "https://ui-avatars.com/api/?name=Vic+Malo&background=random",
-      },
-    });
-
-    // Si el usuario ya existía, asumimos que la BD ya tiene datos y cortamos la ejecución aquí
-    if (!created) return;
+    // Verificar si ya existen datos
+    const userCount = await User.count();
+    if (userCount > 0) {
+      console.log("✅ Base de datos ya contiene usuarios. Saltando seeder.");
+      return;
+    }
 
     console.log(
-      "🌱 Verificando y poblando la base de datos con múltiples usuarios, álbumes y fotos de prueba...",
+      "🌱 Poblando la base de datos con usuarios, albumes y fotos de prueba...",
     );
 
-    // 2. Definir lista de usuarios adicionales de prueba
-    const testUsersData = [
-      {
-        firstName: "Ana",
-        lastName: "García",
-        nickname: "anita_g",
-        dni: 44444444,
-        birthdate: "1995-04-12",
-        email: "ana@mail.com",
-        password: "123",
-        avatarUrl:
-          "https://ui-avatars.com/api/?name=Ana+Garcia&background=random",
-      },
-      {
-        firstName: "Carlos",
-        lastName: "López",
-        nickname: "carlos_l",
-        dni: 22222222,
-        birthdate: "1988-10-20",
-        email: "carlos@mail.com",
-        password: "123",
-        avatarUrl:
-          "https://ui-avatars.com/api/?name=Carlos+Lopez&background=random",
-      },
-      {
-        firstName: "María",
-        lastName: "Fernández",
-        nickname: "mary_f",
-        dni: 33333333,
-        birthdate: "1992-07-05",
-        email: "maria@mail.com",
-        password: "123",
-        avatarUrl:
-          "https://ui-avatars.com/api/?name=Maria+Fernandez&background=random",
-      },
-    ];
-
-    // Array para almacenar todos los usuarios a poblar (incluyendo el usuario principal testUser)
+    // Creo todos los usuarios
     const usersToSeed = [];
-    if (testUser) usersToSeed.push(testUser);
-
-    // Buscar o crear los usuarios adicionales en la base de datos
-    for (const userData of testUsersData) {
-      const [user, created] = await User.findOrCreate({
+    for (const userData of TEST_USERS) {
+      const user = await User.findOrCreate({
         where: { email: userData.email },
         defaults: userData,
       });
-      usersToSeed.push(user);
+      usersToSeed.push(user[0]);
     }
 
-    // 3. Definir una plantilla de álbumes variados
-    const albumsTemplates = [
-      {
-        title: "Aventura en la Montaña",
-        desc: "Fotos de mi último viaje a los Andes.",
-        tags: ["Paisaje", "Naturaleza"],
-      },
-      {
-        title: "Viaje a la Playa",
-        desc: "Relajación total frente al mar.",
-        tags: ["Paisaje", "Viajes"],
-      },
-      {
-        title: "Paisajes Urbanos",
-        desc: "Explorando la jungla de cemento.",
-        tags: ["Urbano", "Arquitectura"],
-      },
-      {
-        title: "Mis Mascotas",
-        desc: "Momentos divertidos en casa.",
-        tags: ["Naturaleza"],
-      },
-      {
-        title: "Ruta Gastronómica",
-        desc: "Comida deliciosa del fin de semana.",
-        tags: ["Viajes", "Urbano"],
-      },
-      {
-        title: "Atardeceres Mágicos",
-        desc: "El cielo pintado de colores.",
-        tags: ["Paisaje", "Naturaleza"],
-      },
-      {
-        title: "Callejones Antiguos",
-        desc: "Historia en cada rincón.",
-        tags: ["Urbano", "Arquitectura"],
-      },
-      {
-        title: "Amigos Peludos",
-        desc: "Jugando en el parque.",
-        tags: ["Naturaleza"],
-      },
-      {
-        title: "Sabores del Mundo",
-        desc: "Platos increíbles que probé.",
-        tags: ["Viajes", "Urbano"],
-      },
-      {
-        title: "Escapada al Bosque",
-        desc: "Respirando aire puro.",
-        tags: ["Paisaje", "Naturaleza"],
-      },
-    ];
+    // Creo fotos y albums para cada usuario
+    console.log("➡️  Creando álbumes y fotos...");
+    let imageId = 10;
 
-    let imageId = 10; // Para usar picsum.photos/id/10, 11, 12... de forma secuencial
-
-    // 4. Crear álbumes y fotos para CADA usuario
     for (const user of usersToSeed) {
-      const postCount = await Post.count({ where: { idUser: user.id } });
+      // selecciono 3 albums al azar
+      const userAlbums = [...ALBUMS_TEMPLATES]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
 
-      // Solo creamos los posts si este usuario no tiene ninguno
-      if (postCount === 0) {
-        console.log(`➡️  Creando álbumes para el usuario: ${user.email}...`);
+      for (const album of userAlbums) {
+        const post = await Post.create({
+          idUser: user.id,
+          title: album.title,
+          description: album.desc,
+          selectedTags: album.tags,
+          openComments: true,
+        });
 
-        // Seleccionar 5 álbumes al azar de la plantilla para que los usuarios tengan datos variados
-        const userAlbums = [...albumsTemplates]
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 5);
-
-        for (const albumData of userAlbums) {
-          const post = await Post.create({
-            idUser: user.id,
-            title: albumData.title,
-            description: albumData.desc,
-            selectedTags: albumData.tags,
+        // creo 3 fotos por album
+        for (let i = 1; i <= 3; i++) {
+          await File.create({
+            idPost: post.id,
+            title: `Foto ${i}`,
+            description: `Una toma de ${album.title.toLowerCase()}.`,
+            path: `https://picsum.photos/id/${imageId}/800/600`,
+            mimetype: "image/jpeg",
+            selectedTags: album.tags,
             openComments: true,
+            textCopyright:
+              i % 2 === 0 ? `© 2026 FOTAZA - ${user.firstName}` : null,
           });
-
-          // Crear 5 fotos por cada álbum
-          for (let i = 1; i <= 5; i++) {
-            await File.create({
-              idPost: post.id,
-              title: `Foto ${i}`,
-              description: `Una increíble toma de ${albumData.title.toLowerCase()} capturada por ${user.firstName}.`,
-              path: `https://picsum.photos/id/${imageId}/800/600`, // Imágenes de prueba aleatorias
-              mimetype: "image/jpeg",
-              selectedTags: albumData.tags,
-              openComments: true,
-              textCopyright: `© 2026 FOTAZA - ${user.firstName} ${user.lastName}`,
-            });
-            imageId++; // Incrementar para asegurar imágenes diferentes
-          }
+          imageId++;
         }
       }
     }
 
+    // Creo comentarios
+    console.log("➡️  Creando comentarios...");
+    const allFiles = await File.findAll();
+
+    for (const file of allFiles) {
+      const post = await Post.findByPk(file.idPost);
+      const otherUsers = usersToSeed.filter((u) => u.id !== post.idUser);
+
+      // 2 comentarios por archivo
+      for (let i = 0; i < Math.min(otherUsers.length, 2); i++) {
+        await Comment.findOrCreate({
+          where: { idUser: otherUsers[i].id, idFile: file.id },
+          defaults: {
+            idUser: otherUsers[i].id,
+            idFile: file.id,
+            text: `¡Excelente foto! Me encanta.`,
+          },
+        });
+      }
+    }
+
+    // Creo valoraciones
+    console.log("➡️  Creando valoraciones...");
+    for (const file of allFiles) {
+      const post = await Post.findByPk(file.idPost);
+      const otherUsers = usersToSeed.filter((u) => u.id !== post.idUser);
+
+      // 3 valoraciones por archivo
+      for (let i = 0; i < Math.min(otherUsers.length, 3); i++) {
+        const score = Math.floor(Math.random() * 5) + 1;
+        await Rating.findOrCreate({
+          where: { idUser: otherUsers[i].id, idFile: file.id },
+          defaults: {
+            idUser: otherUsers[i].id,
+            idFile: file.id,
+            score,
+          },
+        });
+      }
+    }
+
+    //Creo seguimientos
+    console.log("➡️  Creando relaciones de seguimiento...");
+    for (const follower of usersToSeed) {
+      const toFollow = usersToSeed.filter((u) => u.id !== follower.id);
+      // Cada usuario sigue a 1-2 usuarios al azar
+      const followCount = Math.min(
+        Math.floor(Math.random() * 2) + 1,
+        toFollow.length,
+      );
+
+      for (let i = 0; i < followCount; i++) {
+        const following = toFollow[i];
+        await Follow.findOrCreate({
+          where: { followerId: follower.id, followingId: following.id },
+        });
+      }
+    }
+
     console.log(
-      "✅ Datos de prueba creados exitosamente para múltiples usuarios.",
+      `✅ Datos creados: ${usersToSeed.length} usuarios con álbumes, fotos y relaciones.`,
     );
   } catch (error) {
-    console.error("Error ejecutando el seeder de prueba:", error);
+    console.error("❌ Error en seeder:", error);
+    throw error;
   }
 };

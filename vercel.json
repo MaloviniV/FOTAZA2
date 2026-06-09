@@ -10,9 +10,10 @@
     }
   ],
   "routes": [
+    { "handle": "filesystem" },
     {
       "source": "/(.*)",
-      "destination": "/src/app.js"
+      "dest": "/src/app.js"
     }
   ]
 }

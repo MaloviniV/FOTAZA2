@@ -26,7 +26,6 @@ export const uploadFile = async (fileBuffer, fileName) => {
   if (server.isProduction) {
     // Produccion: usar Vercel Blob
     const blob = await put(`fotaza/${fileName}`, fileBuffer, {
-      access: "public",
       token: serviceBlob.vercelBlobToken,
     });
     return blob.url;

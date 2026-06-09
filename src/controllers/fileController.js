@@ -114,8 +114,8 @@ export const addComment = async (req, res) => {
 export const createFile = async (req, res) => {
   const postId = req.params.postId;
 
-  const { title, description, selectedTags, openComments, textCopyright } =
-    req.body;
+  const { title, description, openComments, textCopyright } = req.body;
+  let selectedTags = req.body.selectedTags;
 
   try {
     if (!req.file) {

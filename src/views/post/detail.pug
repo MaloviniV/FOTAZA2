@@ -33,15 +33,23 @@ block content
                   i.fa-solid.fa-comments.me-2
                   | #{post.openComments ? "Comentarios Abiertos" : "Comentarios Cerrados"}
             
-            .post-actions.d-flex.flex-wrap.gap-2
-              a.btn.btn-outline-secondary.rounded-pill.px-4.fw-medium(href="/dashboard/posts") 
-                i.fa-solid.fa-arrow-left.me-2
-                | Volver
-              a.btn.btn-outline-primary.rounded-pill.px-4.fw-medium(href=`/post/showFormPost?postId=${post.id}`) Editar
-              button.btn.btn-outline-danger.rounded-pill.px-4.fw-medium#deletePost-btn(type="button" data-post-id=post.id) Borrar
-              a.btn.btn-primary.rounded-pill.px-4.fw-bold.shadow-sm(href=`/post/${post.id}/file/?titlePost=${encodeURIComponent(post.title)}`) 
-                i.fa-solid.fa-plus.me-2
-                | Agregar Imagen
+            //- Acciones del Post
+            if currentUser && currentUser.id === post.idUser
+              //- Acciones para el dueño del post
+              .post-actions.d-flex.flex-wrap.gap-2
+                a.btn.btn-outline-secondary.rounded-pill.px-4.fw-medium(href="/dashboard/posts") 
+                  i.fa-solid.fa-arrow-left.me-2
+                  | Volver a Mis Posts
+                a.btn.btn-outline-primary.rounded-pill.px-4.fw-medium(href=`/post/showFormPost?postId=${post.id}`) Editar
+                button.btn.btn-outline-danger.rounded-pill.px-4.fw-medium#deletePost-btn(type="button" data-post-id=post.id) Borrar
+                a.btn.btn-primary.rounded-pill.px-4.fw-bold.shadow-sm(href=`/post/${post.id}/file/?titlePost=${encodeURIComponent(post.title)}`) 
+                  i.fa-solid.fa-plus.me-2
+                  | Agregar Imagen
+            else
+              //- Acción para visitantes
+              a.btn.btn-outline-secondary.rounded-pill.px-4.fw-medium(href=`/user/${post.idUser}`) 
+                i.fa-solid.fa-user.me-2
+                | Ver perfil del autor
 
       //- IMAGENES DEL ALBUM
       .mb-5

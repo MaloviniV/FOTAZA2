@@ -134,8 +134,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "¡Archivo subido exitosamente!",
           "Subir otro archivo",
           window.location.href,
-          "Ver mis Posts",
-          "/dashboard/posts",
+          "Ver Post",
+          `/post/${idPost}`
         );
       }
 

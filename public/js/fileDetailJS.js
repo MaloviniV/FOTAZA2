@@ -166,13 +166,16 @@ document.addEventListener("DOMContentLoaded", () => {
               const commentsContainer = commentItem.parentElement;
               commentItem.remove();
 
-              
-              if (commentsContainer && commentsContainer.children.length === 0) {
-                const emptyStateDiv = document.createElement('div');
-                emptyStateDiv.className = 'text-center py-4';
-                const emptyStateP = document.createElement('p');
-                emptyStateP.className = 'text-muted mb-0';
-                emptyStateP.textContent = 'No hay comentarios aún. ¡Sé el primero en opinar!';
+              if (
+                commentsContainer &&
+                commentsContainer.children.length === 0
+              ) {
+                const emptyStateDiv = document.createElement("div");
+                emptyStateDiv.className = "text-center py-4";
+                const emptyStateP = document.createElement("p");
+                emptyStateP.className = "text-muted mb-0";
+                emptyStateP.textContent =
+                  "No hay comentarios aún. ¡Sé el primero en opinar!";
                 emptyStateDiv.appendChild(emptyStateP);
 
                 commentsContainer.replaceWith(emptyStateDiv);

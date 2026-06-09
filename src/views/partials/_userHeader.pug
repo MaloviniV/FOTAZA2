@@ -29,8 +29,6 @@
         if currentUser && user.id !== currentUser.id
           button#btn-follow.btn.rounded-pill.px-4.fw-bold.shadow-sm(class=(isFollowing ? "btn-outline-primary" : "btn-primary") data-user-id=user.id)
             if isFollowing
-              i.fa-solid.fa-user-minus.me-2
               | Dejar de seguir
             else
-              i.fa-solid.fa-user-plus.me-2
               | Seguir

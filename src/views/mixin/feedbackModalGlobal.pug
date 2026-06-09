@@ -38,38 +38,48 @@ mixin feedbackModalGlobal(type, title, message, primaryBtnText, primaryBtnLink, 
         if (primaryBtnText) {
           primaryBtn.textContent = primaryBtnText;
           primaryBtn.classList.remove('d-none');
-          primaryBtn.onclick = (e) => {
-            if (primaryBtnLink) {
-              e.preventDefault();
-              window.location.href = primaryBtnLink;
-            }
-          };
           if (!primaryBtnLink) {
             primaryBtn.setAttribute('data-bs-dismiss', 'modal');
+            primaryBtn.onclick = null;
           } else {
+            primaryBtn.onclick = (e) => {
+              e.preventDefault();
+              if (typeof primaryBtnLink === 'function') {
+                primaryBtnLink();
+              } else {
+                window.location.href = primaryBtnLink;
+              }
+              globalModalInstance.hide();
+            };
             primaryBtn.removeAttribute('data-bs-dismiss');
           }
         } else {
           primaryBtn.classList.add('d-none');
+          primaryBtn.onclick = null;
         }
 
         // BOTON SECUNDARIO
         if (secondaryBtnText) {
           secondaryBtn.textContent = secondaryBtnText;
           secondaryBtn.classList.remove('d-none');
-          secondaryBtn.onclick = (e) => {
-            if (secondaryBtnLink) {
-              e.preventDefault();
-              window.location.href = secondaryBtnLink;
-            }
-          };
           if (!secondaryBtnLink) {
             secondaryBtn.setAttribute('data-bs-dismiss', 'modal');
+            secondaryBtn.onclick = null;
           } else {
+            secondaryBtn.onclick = (e) => {
+              e.preventDefault();
+              if (typeof secondaryBtnLink === 'function') {
+                secondaryBtnLink();
+              } else {
+                window.location.href = secondaryBtnLink;
+              }
+              globalModalInstance.hide();
+            };
             secondaryBtn.removeAttribute('data-bs-dismiss');
           }
         } else {
           secondaryBtn.classList.add('d-none');
+          secondaryBtn.onclick = null;
         }
 
         globalModalInstance.show();

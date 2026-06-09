@@ -125,7 +125,7 @@ export const connectDatabase = async () => {
   console.log("✅ Conexión a PostgreSQL establecida con éxito.");
 
   if (database.sync) {
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: true});
     console.log("✅ BD sincronizada con éxito.");
 
     await applyConstraintsAndTriggers();

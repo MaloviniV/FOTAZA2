@@ -16,13 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!response.ok) {
             throw new Error(data.error || "Error desconocido al borrar el álbum.");
           }
-          window.showGlobalModal(
-            "success",
-            "Álbum Borrado",
-            "El álbum ha sido eliminado correctamente.",
-            "Ir a Mis Posts",
-            "/dashboard/posts",
-          );
+          
+          setTimeout(()=>{
+            window.showGlobalModal(
+              "success",
+              "Álbum Borrado",
+              "El álbum ha sido eliminado correctamente."
+            );
+
+            setTimeout(() => (window.location.href = "/dashboard/posts"), 1500);
+          },300);
+
         } catch (error) {
           console.error("Error al borrar el álbum:", error);
           setTimeout(() => {
@@ -53,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           // Sacar tarjeta del DOM
           e.currentTarget.closest(".col-md-6").remove();
+
           window.showGlobalModal("success", "Imagen Borrada", "La imagen ha sido eliminada.");
         } catch (error) {
           console.error("Error al borrar la imagen:", error);

@@ -3,9 +3,12 @@ import Post from "../models/Post.js";
 import User from "../models/User.js";
 import Rating from "../models/Rating.js";
 import Comment from "../models/Comment.js";
-import { put, del } from "@vercel/blob";
 import { LIST_TAGS } from "../utils/constants.js";
-import { serviceBlob } from "../config/config.js";
+import sharp from "sharp";
+import {
+  uploadFile,
+  deleteFile as deleteStorageFile,
+} from "../utils/storageService.js";
 
 //MUESTRA EL FORMULARIO PARA CARGAR/MODIFICAR 1 ARCHIVO
 export const showFormFile = async (req, res) => {
@@ -121,19 +124,26 @@ export const createFile = async (req, res) => {
         .json({ success: false, error: "Falta el archivo" });
     }
 
-    const { mimetype } = req.file;
+    let fileBuffer = req.file.buffer;
+    let { mimetype } = req.file;
+    const originalName = req.file.originalname;
+    let fileName = `${Date.now()}-${originalName}`;
 
-    // Subo el archivo a Vercel Blob
-    const blob = await put(
-      `fotaza/${Date.now()}-${req.file.originalname}`,
-      req.file.buffer,
-      {
-        access: "public",
-        token: serviceBlob.vercelBlobToken,
-      },
-    );
+    // Proceso la imagen con Sharp
+    if (mimetype.startsWith("image/")) {
+      fileBuffer = await sharp(fileBuffer)
+        .resize({ width: 1920, withoutEnlargement: true }) // Max 1920px de ancho
+        .webp({ quality: 80 }) // Convierto a WebP con 80% de calidad
+        .toBuffer();
+      mimetype = "image/webp";
+      const nameWithoutExtension =
+        originalName.substring(0, originalName.lastIndexOf(".")) ||
+        originalName;
+      fileName = `${Date.now()}-${nameWithoutExtension}.webp`;
+    }
 
-    const path = blob.url;
+    // Guardar el archivo en storage (local o blob)
+    const filePath = await uploadFile(fileBuffer, fileName);
 
     if (!selectedTags) {
       return res.status(400).json({
@@ -147,7 +157,7 @@ export const createFile = async (req, res) => {
     const file = await File.create({
       idPost: postId,
       title,
-      path,
+      path: filePath,
       mimetype,
       description,
       selectedTags,
@@ -338,18 +348,28 @@ export const updateFile = async (req, res) => {
     };
 
     if (req.file) {
-      // Subo el nuevo archivo a Vercel Blob
-      const blob = await put(
-        `fotaza/${Date.now()}-${req.file.originalname}`,
-        req.file.buffer,
-        {
-          access: "public",
-          token: serviceBlob.vercelBlobToken,
-        },
-      );
+      let fileBuffer = req.file.buffer;
+      let { mimetype } = req.file;
+      const originalName = req.file.originalname;
+      let fileName = `${Date.now()}-${originalName}`;
 
-      updateData.path = blob.url;
-      updateData.mimetype = req.file.mimetype;
+      // proceso con Sharp
+      if (mimetype.startsWith("image/")) {
+        fileBuffer = await sharp(fileBuffer)
+          .resize({ width: 1920, withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer();
+        mimetype = "image/webp";
+        const nameWithoutExtension =
+          originalName.substring(0, originalName.lastIndexOf(".")) ||
+          originalName;
+        fileName = `${Date.now()}-${nameWithoutExtension}.webp`;
+      }
+
+      // Guardo el nuevo archivo en storage (local o blob)
+      const newFilePath = await uploadFile(fileBuffer, fileName);
+      updateData.path = newFilePath;
+      updateData.mimetype = mimetype;
     }
 
     const [rowsUpdated] = await File.update(updateData, {
@@ -378,19 +398,11 @@ export const deleteFile = async (req, res) => {
   const fileId = req.params.fileId;
 
   try {
-    // Busco el archivo para obtener su URL de Vercel Blob antes de borrarlo
+    // Busco el archivo para eliminarlo del storage antes de borrarlo de la BD
     const file = await File.findByPk(fileId);
 
-    if (
-      file &&
-      file.path &&
-      file.path.includes("public.blob.vercel-storage.com")
-    ) {
-      try {
-        await del(file.path, { token: serviceBlob.vercelBlobToken });
-      } catch (err) {
-        console.error("Error al borrar de Vercel Blob:", err);
-      }
+    if (file && file.path) {
+      await deleteStorageFile(file.path);
     }
 
     const deleteRow = await File.destroy({ where: { id: fileId } });

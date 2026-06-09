@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../config/db/db.js";
 import { ROLES, LIST_ROLES } from "../utils/constants.js";
 
 class User extends Model {}
@@ -31,7 +31,7 @@ User.init(
     },
     birthdate: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING(50),

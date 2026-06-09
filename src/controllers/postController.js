@@ -1,9 +1,8 @@
 import Post from "../models/Post.js";
 import File from "../models/File.js";
 import { LIST_TAGS } from "../utils/constants.js";
-import { sequelize } from "../config/db.js";
-import { del } from "@vercel/blob";
-import { serviceBlob } from "../config/config.js";
+import { sequelize } from "../config/db/db.js";
+import { deleteFile } from "../utils/storageService.js";
 
 //MOSTRAR EL FORMULARIO DE POST PARA CREAR/EDITAR (LISTO)
 export const showFormPost = async (req, res) => {
@@ -156,14 +155,10 @@ export const deletePost = async (req, res) => {
         .json({ success: false, error: "No se encontró el Álbum a borrar" });
     }
 
-    // 1. Eliminar archivos de Vercel Blob
+    //Elimino archivos del storage
     for (const file of post.Files) {
-      if (file.path && file.path.includes("public.blob.vercel-storage.com")) {
-        try {
-          await del(file.path, { token: serviceBlob.vercelBlobToken });
-        } catch (err) {
-          console.error(`Error al borrar de Vercel Blob: ${file.path}`, err);
-        }
+      if (file.path) {
+        await deleteFile(file.path);
       }
     }
 

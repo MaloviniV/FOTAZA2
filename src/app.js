@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { server } from "./config/config.js";
-import { connectDatabase, sequelize } from "./config/db.js";
+import { connectDatabase, sequelize } from "./config/db/db.js";
 import "./models/index.js";
 
 import routes from "./routes/indexRoutes.js";
@@ -36,9 +36,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: server.isProduction,  //en produccion HTTPS(true), en desarrollo HTTP(false)
-      maxAge: 1000 * 60 * 60 * 24
-    }
+      secure: server.isProduction, //en produccion HTTPS(true), en desarrollo HTTP(false)
+      maxAge: 1000 * 60 * 60 * 24,
+    },
   }),
 );
 
@@ -67,8 +67,7 @@ app.use((req, res, next) => {
 //Middleware Global de Manejo de Errores
 app.use((err, req, res, next) => {
   console.error("💥 ERROR ATRAPADO:", err.message);
-  //res.status(err.statusCode || 500).json({
-  res.status(err.statusCode || 500).render("error.pug",{
+  res.status(err.statusCode || 500).render("error.pug", {
     success: false,
     error: err.message || "Error interno del servidor",
   });

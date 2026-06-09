@@ -1,7 +1,7 @@
 import File from "../models/File.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../config/db/db.js";
 import { Op } from "sequelize";
 
 const LIMIT = 10;

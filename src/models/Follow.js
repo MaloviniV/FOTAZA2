@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../config/db/db.js";
 import { STATUS_FOLLOW, LIST_STATUS_FOLLOW } from "../utils/constants.js";
 
 class Follow extends Model {}

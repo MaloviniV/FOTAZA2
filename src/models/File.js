@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../config/db/db.js";
 import { LIST_TAGS } from "../utils/constants.js";
 
 class File extends Model {}
@@ -33,9 +33,9 @@ File.init(
       validate: {
         is: {
           args: /^(image|video)\/.+$/i,
-          msg: "El tipo de archivo debe ser un formato de imagen o video válido."
-        }
-      }
+          msg: "El tipo de archivo debe ser un formato de imagen o video válido.",
+        },
+      },
     },
     description: {
       type: DataTypes.STRING(200),
@@ -45,13 +45,15 @@ File.init(
       type: DataTypes.ARRAY(DataTypes.STRING(50)),
       defaultValue: [],
       validate: {
-        validationTags(value){
-          if(!Array.isArray(value)) throw new Error("Los tags debe ser un Array");
-          value.forEach(tag => {
-            if(!LIST_TAGS.includes(tag)) throw new Error(`El Tag ${tag} no es válido`);            
-          });          
-        }
-      }
+        validationTags(value) {
+          if (!Array.isArray(value))
+            throw new Error("Los tags debe ser un Array");
+          value.forEach((tag) => {
+            if (!LIST_TAGS.includes(tag))
+              throw new Error(`El Tag ${tag} no es válido`);
+          });
+        },
+      },
     },
     openComments: {
       type: DataTypes.BOOLEAN,

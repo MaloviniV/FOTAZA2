@@ -1,7 +1,8 @@
 import { Sequelize } from "sequelize";
-import { database, server } from "./config.js";
+import { database, server } from "../config.js";
 import pg from "pg";
 
+//OBJETO SEQUELIZE (configuracion)
 export const sequelize = new Sequelize(
   database.name,
   database.user,
@@ -83,6 +84,42 @@ const applyConstraintsAndTriggers = async () => {
   console.log("✅ Restricciones y Triggers personalizados aplicados.");
 };
 
+//VERIFICO SI EXISTE O CREO LA BD
+export const createDB = async () => {
+  const { Client } = pg;
+  try {
+    const client = new Client({
+      host: database.host,
+      port: database.port,
+      user: database.user,
+      password: database.password,
+      database: database.dialect,
+    });
+
+    await client.connect();
+
+    const response = await client.query(
+      `SELECT 1 FROM pg_database WHERE datname = '${database.name}'`,
+    );
+
+    if (response.rowCount === 0) {
+      console.log(`⚠️ BD '${database.name}' no encontrada. Creandola....`);
+
+      await client.query(`CREATE DATABASE '${database.name}'`);
+
+      console.log(`✅ BD '${database.name}' creada exitosamente.`);
+    } else {
+      console.log("La BD ya existe.");
+    }
+
+    await client.end();
+  } catch (error) {
+    console.error("❌ Error al verificar/crear la BD: ", error);
+    throw error;
+  }
+};
+
+//VERIFICA CONEXION DE BD, SINCRONIZA LAS TABLAS Y LAS PUEBLA
 export const connectDatabase = async () => {
   await sequelize.authenticate();
   console.log("✅ Conexión a PostgreSQL establecida con éxito.");
@@ -93,8 +130,8 @@ export const connectDatabase = async () => {
 
     await applyConstraintsAndTriggers();
 
-    // Poblamos la base de datos con datos de prueba si está vacía
-    const { seedTestData } = await import("../seeders/testSeeder.js");
+    // Pueblo la base de datos si esta vacia
+    const { seedTestData } = await import("./testSeeder.js");
     await seedTestData();
   } else {
     console.log(

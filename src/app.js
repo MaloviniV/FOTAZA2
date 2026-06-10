@@ -71,6 +71,21 @@ const bootstrap = async () => {
     next();
   });
 
+  app.use((req, res, next) => {
+    if (req.originalUrl.startsWith("/dashboard")) {
+      console.log(
+        "DEBUG /dashboard =>",
+        req.method,
+        req.originalUrl,
+        "user=",
+        !!req.user,
+        "session=",
+        req.sessionID,
+      );
+    }
+    next();
+  });
+
   //Rutas de la aplicacion
   app.use("/post", requireAuth, routes.postRoutes);
   app.get("/dashboard", requireAuth, showHome);

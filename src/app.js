@@ -10,6 +10,7 @@ import "./models/index.js";
 
 import routes from "./routes/indexRoutes.js";
 import { requireAuth } from "./middlewares/authMidleware.js";
+import { showHome } from "./controllers/dashboardController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +73,8 @@ const bootstrap = async () => {
 
   //Rutas de la aplicacion
   app.use("/post", requireAuth, routes.postRoutes);
+  app.get("/dashboard", requireAuth, showHome);
+  app.get("/dashboard/", requireAuth, showHome);
   app.use("/dashboard", requireAuth, routes.dashboardRoutes);
   app.use("/user", requireAuth, routes.userRoutes);
   app.use("/auth", routes.authRoutes);

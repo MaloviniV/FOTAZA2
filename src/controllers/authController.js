@@ -24,7 +24,7 @@ export const processLogin = async (req, res) => {
         avatarUrl: user.avatarUrl,
       };
 
-      return res.redirect("/dashboard");
+      return res.redirect(303, "/dashboard");
     } else {
       throw new Error("Email o contraseña incorrectos");
     }
@@ -60,6 +60,7 @@ export const prossesRegister = async (req, res) => {
     });
 
     res.redirect(
+      303,
       `/auth/login?email=${encodeURIComponent(newUser.email)}&name=${encodeURIComponent(newUser.firstName)}`,
     );
   } catch (error) {

@@ -24,17 +24,7 @@ export const processLogin = async (req, res) => {
         avatarUrl: user.avatarUrl,
       };
 
-      req.session.save((err) => {
-        if (err) {
-          console.error("Error al guardar la sesión:", err);
-          return res.status(500).render("auth/login.pug", {
-            error: "Ocurrió un error interno al iniciar sesión.",
-            email,
-          });
-        }
-
-        return res.redirect("/dashboard");
-      });
+      return res.redirect("/dashboard");
     } else {
       throw new Error("Email o contraseña incorrectos");
     }

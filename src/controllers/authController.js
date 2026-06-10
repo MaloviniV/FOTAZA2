@@ -33,7 +33,7 @@ export const processLogin = async (req, res) => {
           });
         }
 
-        res.redirect("/dashboard");
+        return res.redirect("/dashboard");
       });
     } else {
       throw new Error("Email o contraseña incorrectos");

@@ -1,4 +1,4 @@
-import { sequelize, createDB, connectDatabase } from './src/config/db.js';
+import { sequelize, createDB, connectDatabase } from './config/db.js';
 
 
 (async () => {

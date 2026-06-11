@@ -85,7 +85,7 @@ block content
             source(src=file.path type=file.mimetype)
             | Archivo incompatible.
         else
-          img.img-fluid.object-fit-contain(src=file.path alt=file.title || "Archivo multimedia" style="max-height: 75vh;")
+          img.img-fluid.w-100.h-100.object-fit-contain(src=file.path alt=file.title || "Archivo multimedia" style="max-height: 75vh;")
 
       //- SECCION DE COMENTARIOS
       +comments(file, `/post/${file.idPost}/file/${file.id}/comment`, true)

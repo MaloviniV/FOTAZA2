@@ -25,7 +25,10 @@ export const TAGS = Object.freeze({
   ASTROFOTOGRAFIA: "Astrofotografía",
   MINIMALISMO: "Minimalismo",
   DEPORTES: "Deportes",
-  VIAJES: "Viajes"
+  VIAJES: "Viajes",
+  FAUNA: "Fauna",
+  FLORA: "Flora",
+  MASCOTA: "Mascota"
 });
 
 export const LIST_TAGS = Object.values(TAGS);

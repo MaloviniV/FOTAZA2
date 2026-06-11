@@ -83,7 +83,7 @@ export const addComment = async (req, res) => {
   const { commentText } = req.body;
 
   if (!req.user) {
-    return res.redirect("/auth/login");
+    return res.redirect(303,"/auth/login");
   }
 
   try {
@@ -103,7 +103,7 @@ export const addComment = async (req, res) => {
       });
     }
 
-    res.redirect(`/post/${postId}/file/${fileId}`);
+    res.redirect(303,`/post/${postId}/file/${fileId}`);
   } catch (error) {
     console.error("❌ Error al agregar comentario:", error);
     res.status(500).send("Ocurrió un error al intentar agregar el comentario.");
